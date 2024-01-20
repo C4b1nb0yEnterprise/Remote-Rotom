@@ -1,0 +1,28 @@
+{
+  "name": "remote-rotom",
+  "version": "1.0.0",
+  "description": "Discord Bot for Unown# Rotom",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/C4b1nb0yEnterprise/Remote-Rotom.git"
+  },
+  "keywords": [
+    "Discord",
+    "Unown#",
+    "Rotom"
+  ],
+  "author": "C4b1nb0y",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/C4b1nb0yEnterprise/Remote-Rotom/issues"
+  },
+  "homepage": "https://github.com/C4b1nb0yEnterprise/Remote-Rotom#readme",
+  "dependencies": {
+    "discord.js": "^14.14.1"
+  }
+}

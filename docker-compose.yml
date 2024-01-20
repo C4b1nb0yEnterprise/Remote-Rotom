@@ -1,0 +1,16 @@
+version: '3.1'
+services:
+
+  remote-rotom:
+    build: ./Remote-Rotom
+    command: npm run start
+    restart: unless-stopped
+    volumes:
+      - ./Remote-Rotom:/usr/app/
+      - /usr/app/node_modules
+    networks:
+      - default
+    depends_on:
+      - rotom
+#    logging:
+#      driver: local
