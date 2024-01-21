@@ -13,9 +13,10 @@ module.exports = {
 		const rotomStatus = await response.json();
 
 		const rotomLink = hyperlink('Rotom', rotom.address);
-		const message = `Devices Status Overview from ${rotomLink}`;
-
+		
 		let deviceEmbeds = [];
+		let deviceOnlineCounter = 0;
+		let workerOnlineCounter = 0;
 
 		// sort device array
 		rotomStatus.devices.sort((a, b) => a.origin.localeCompare(b.origin))
@@ -51,7 +52,7 @@ module.exports = {
 					.setTimestamp()
 					.setFooter({ text: rotomStatus.devices[i].origin, iconURL: 'https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/1.png' });
 			}
-
+			deviceOnlineCounter++
 			deviceEmbeds.push(deviceEmbed);
 
 		}
@@ -85,12 +86,13 @@ module.exports = {
 					.setTimestamp()
 					.setFooter({ text: rotomStatus.workers[i].workerId, iconURL: 'https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/misc/grass.png' });
 			}
-
+			workerOnlineCounter++
 			deviceEmbeds.push(deviceEmbed);
 
 		}
 
 		//console.log(deviceEmbeds);
+		const message = `**Status Overview from ${rotomLink}**\nDevices online: ${deviceOnlineCounter}/${rotomStatus.devices.length}\nWorker online: ${workerOnlineCounter}/${rotomStatus.workers.length}`;
 		await interaction.reply({content: message, embeds: deviceEmbeds, ephemeral: true });
 	},
 };
