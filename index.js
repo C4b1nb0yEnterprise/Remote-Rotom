@@ -2,7 +2,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { REST, Routes, Client, Collection, Events, GatewayIntentBits } = require('discord.js');
-const { clientId, guildId, token } = require('./config.json');
+const { clientId, guildId, token, commandPermissionRole } = require('./config.json');
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -59,6 +59,12 @@ client.once(Events.ClientReady, readyClient => {
 
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
+
+	if (!interaction.member.roles.cache.has(commandPermissionRole)){
+		console.log(`The user ${interaction.user.username}'s is not allowed to use Slash Commands.`);
+		await interaction.reply({content: "Sorry, you are not allowed to use this Slash Command 😔", ephemeral: true });
+		return
+	}
 
 	const command = interaction.client.commands.get(interaction.commandName);
 
