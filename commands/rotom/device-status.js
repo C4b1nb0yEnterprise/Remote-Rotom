@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { EmbedBuilder, SlashCommandBuilder, time, hyperlink } = require('discord.js');
 const { rotom } = require('../../config.json');
 
 module.exports = {
@@ -6,19 +6,53 @@ module.exports = {
 		.setName('device-status')
 		.setDescription('Rotom Devices Status Overview'),
 	async execute(interaction) {
-		const response = await fetch(rotom.address + "/api/status");
-		const rotomStatus = await response.json();
+
 		console.log(`User ${interaction.user.username} requested the device status.`);
 
-		let message = "These devices are alive: ";
+		const response = await fetch(rotom.address + "/api/status");
+		const rotomStatus = await response.json();
+
+		const rotomLink = hyperlink('Rotom', rotom.address);
+		const message = `Devices Status Overview from ${rotomLink}`;
+
+		let deviceEmbeds = [];
 
 		for (let i=0; i< rotomStatus.devices.length; i++){
-			if (rotomStatus.devices[i].isAlive === true) {
-				message += rotomStatus.devices[i].origin + " | "
+
+			let lastMessageDate = time(Math.round(rotomStatus.devices[i].dateLastMessageReceived / 1000), 'R');
+			let lastMessageSentDate = time(Math.round(rotomStatus.devices[i].dateLastMessageSent / 1000), 'R');
+
+			console.log(rotomStatus.devices[i].dateLastMessageSent);
+			
+			let deviceEmbed = new EmbedBuilder()
+			if (rotomStatus.devices[i].isAlive == true ) {
+				console.log("Alive");
+				deviceEmbed
+					.setColor("Green")
+					.setTitle(`✅ ${rotomStatus.devices[i].origin} is online`)
+					.addFields({ name: '📱 Device ID', value: rotomStatus.devices[i].deviceId, inline: false })
+					.addFields({ name: '📥 Last Message Received', value: lastMessageDate, inline: false })
+					.addFields({ name: '📤 Last Message Sent', value: lastMessageSentDate, inline: false })
+					.setThumbnail('https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/1.png')
+					.setTimestamp()
+					.setFooter({ text: rotomStatus.devices[i].origin, iconURL: 'https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/1.png' });
+			} else {
+				console.log("Not alive")
+				deviceEmbed
+					.setColor("Red")
+					.setTitle(`⛔ ${rotomStatus.devices[i].origin} is offline`)
+					.addFields({ name: '📱 Device ID', value: rotomStatus.devices[i].deviceId, inline: false })
+					.addFields({ name: '📥 Last Message Received', value: lastMessageDate, inline: false })
+					.addFields({ name: '📤 Last Message Sent', value: lastMessageSentDate, inline: false })
+					.setThumbnail('https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/0.png')
+					.setTimestamp()
+					.setFooter({ text: rotomStatus.devices[i].origin, iconURL: 'https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/0.png' });
 			}
 
-		}
+			deviceEmbeds.push(deviceEmbed);
 
-		await interaction.reply({content: message, ephemeral: true });
+		}
+		console.log(deviceEmbeds);
+		await interaction.reply({content: message, embeds: deviceEmbeds, ephemeral: true });
 	},
 };
