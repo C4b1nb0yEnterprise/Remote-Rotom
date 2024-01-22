@@ -31,6 +31,7 @@ module.exports = {
 			let deviceEmbed = new EmbedBuilder()
 			if (rotomStatus.devices[i].isAlive == true ) {
 				console.log(`Device ${rotomStatus.devices[i].origin} is alive`);
+				deviceOnlineCounter++
 				deviceEmbed
 					.setColor("Green")
 					.setTitle(`✅ ${rotomStatus.devices[i].origin} is online`)
@@ -52,7 +53,6 @@ module.exports = {
 					.setTimestamp()
 					.setFooter({ text: rotomStatus.devices[i].origin, iconURL: 'https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/1.png' });
 			}
-			deviceOnlineCounter++
 			deviceEmbeds.push(deviceEmbed);
 
 		}
@@ -65,6 +65,7 @@ module.exports = {
 			let deviceEmbed = new EmbedBuilder()
 			if (rotomStatus.workers[i].worker.isAlive == true && rotomStatus.workers[i].isAllocated == true ) {
 				console.log(`Device ${rotomStatus.workers[i].workerId} is active`);
+				workerOnlineCounter++
 				deviceEmbed
 					.setColor("Grey")
 					.setTitle(`🛠️ ${rotomStatus.workers[i].workerId} is active`)
@@ -86,7 +87,6 @@ module.exports = {
 					.setTimestamp()
 					.setFooter({ text: rotomStatus.workers[i].workerId, iconURL: 'https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/misc/grass.png' });
 			}
-			workerOnlineCounter++
 			deviceEmbeds.push(deviceEmbed);
 
 		}
