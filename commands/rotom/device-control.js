@@ -136,8 +136,15 @@ module.exports = {
 		collector.on('collect', async i => {
 			const selection = i.values[0];
 			console.log(`${i.user.username} has selected ${selection}!`);
+
+			let selectionLabel = "all";
+
+			if (selection != "all"){
+				let selectedDevice = rotomStatus.devices.find(item => item.deviceId === selection);
+				selectionLabel = selectedDevice.origin;
+			}
 			
-			const userConfirmation = await i.update({ content: `Are you sure, you want to **${action} ${selection}**?`, embeds: [], components: [ confirmRestart ] });
+			const userConfirmation = await i.update({ content: `Are you sure, you want to **${action} ${selectionLabel}**?`, embeds: [], components: [ confirmRestart ] });
 
 			// Confirm Restart
 			try {
@@ -169,7 +176,6 @@ module.exports = {
 					} else {
 						console.log(`${action} ${selection} now!`);
 						console.log(`${rotom.address}/api/device/${selection}/action/${action}`);
-						//let selectedDevice = rotomStatus.devices.find((element) => element.deviceId == selection);
 						try {
 						    let response = await fetch(rotom.address + '/api/device/' + selection + '/action/' + action, {
 							    method: "POST"
@@ -182,7 +188,7 @@ module.exports = {
 						}							
 					}
 					console.log("Done with " + action)
-					await restartUserConfirmation.editReply({ content: `Successfully ${action}ed ${selection}!`, embeds: [], components: [], ephemeral: true })
+					await restartUserConfirmation.editReply({ content: `Successfully ${action}ed ${selectionLabel}!`, embeds: [], components: [], ephemeral: true })
 
 				} else if (restartUserConfirmation.customId === 'cancel') {
 					await restartUserConfirmation.update({ content: 'Action cancelled', embeds: [], components: [] });
