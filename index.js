@@ -2,7 +2,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { REST, Routes, Client, Collection, Events, GatewayIntentBits } = require('discord.js');
-const { clientId, guildId, token, commandPermissionRole } = require('./config.json');
+const { clientId, guildId, token, rotom, commandPermissionRole } = require('./config.json');
+const isReachable = require('is-reachable');
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -65,6 +66,16 @@ client.on(Events.InteractionCreate, async interaction => {
 		await interaction.reply({content: "Sorry, you are not allowed to use this Slash Command 😔", ephemeral: true });
 		return
 	}
+
+	let rotomStatus = await isReachable(rotom.address, {timeout: 2000});
+		if (rotomStatus == true){
+			console.log("Rotom is online.")
+		} else {
+			console.log("[WARNING] Rotom is offline! Cannot process request...")
+			await interaction.reply({content: "Sorry, Rotom is unavailable right now! Cannot execute task 😔", ephemeral: true });
+			return
+		}
+
 
 	const command = interaction.client.commands.get(interaction.commandName);
 
