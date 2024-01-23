@@ -55,17 +55,6 @@ module.exports = {
 
 		}
 
-
-		// const cancel = new ButtonBuilder()
-		// 	.setCustomId('cancel')
-		// 	.setLabel('Cancel')
-		// 	.setStyle(ButtonStyle.Secondary);
-
-		// const restartAllYes = new ButtonBuilder()
-		// 	.setCustomId('yes')
-		// 	.setLabel('Yes')
-		// 	.setStyle(ButtonStyle.Danger);
-
 		const deviceSelect = new StringSelectMenuBuilder()
 			.setCustomId('device-to-execute')
 			.setPlaceholder('Select a device')
@@ -119,13 +108,11 @@ module.exports = {
 				// Get logcat here
 				const logcatZip = await fetch(rotom.address + "/api/device/" + selectedDevice.deviceId + "/action/getLogcat", {
 							    method: "POST"
-							}).then(res => res.arrayBuffer())
-							  .then(buffer => { 
-							  	//const attachment = new AttachmentBuilder(buffer, { name: `logcat-${selectedDevice.origin}.zip` });
-							  	let attachment = "";
-							  	console.log("Sending DM to ", interaction.user.username);
-								i.user.send({content: `Hey there!👋\nHere is your 🪵🐱 from device **${selectedDevice.origin}**.`, files: [{attachments: buffer, name: `logcat-${selectedDevice.origin}.zip`}]});
-							  })
+							})
+				const zipBuffer = await logcatZip.buffer();
+				const attachment = new AttachmentBuilder(zipBuffer, { name: `logcat-${selectedDevice.origin}.zip` });
+				console.log("Sending DM to ", interaction.user.username);
+				await i.user.send({content: `Hey there!👋\nHere is your 🪵🐱 from device **${selectedDevice.origin}**.`, files: [attachment]});
 				
 			}
 		});

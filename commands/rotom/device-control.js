@@ -1,6 +1,5 @@
 const { EmbedBuilder, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ComponentType, time, hyperlink } = require('discord.js');
 const { rotom } = require('../../config.json');
-const wait = require('node:timers/promises').setTimeout;
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -18,9 +17,6 @@ module.exports = {
 		const action = interaction.options.getString('action');
 		console.log(`User ${interaction.user.username} requested a device ${action}.`);
 		console.log(`User ${interaction.user.username} selected this action: `, action);
-
-		// const target = interaction.options.getUser('target');
-		// const reason = interaction.options.getString('reason') ?? 'No reason provided';
 
 		const response = await fetch(rotom.address + "/api/status");
 		const rotomStatus = await response.json();
@@ -66,16 +62,6 @@ module.exports = {
 			deviceEmbeds.push(deviceEmbed);
 
 		}
-
-		// const restartAll = new ButtonBuilder()
-		// 	.setCustomId('restart-all')
-		// 	.setLabel('Restart all')
-		// 	.setStyle(ButtonStyle.Danger);
-
-		// const restartSelected = new ButtonBuilder()
-		// 	.setCustomId('select-device')
-		// 	.setLabel('Select Device')
-		// 	.setStyle(ButtonStyle.Primary);
 
 		const cancel = new ButtonBuilder()
 			.setCustomId('cancel')
