@@ -130,7 +130,7 @@ module.exports = {
 				selectionLabel = selectedDevice.origin;
 			}
 			
-			const userConfirmation = await i.update({ content: `Are you sure, you want to **${action} ${selectionLabel}**?`, embeds: [], components: [ confirmRestart ] });
+			const userConfirmation = await i.update({ content: `⚠️ Are you sure, you want to **${action} ${selectionLabel}**?`, embeds: [], components: [ confirmRestart ] });
 
 			// Confirm Restart
 			try {
@@ -174,7 +174,7 @@ module.exports = {
 						}							
 					}
 					console.log("Done with " + action)
-					await restartUserConfirmation.editReply({ content: `Successfully ${action}ed ${selectionLabel}!`, embeds: [], components: [], ephemeral: true })
+					await restartUserConfirmation.editReply({ content: `✅ Successfully **${action}ed ${selectionLabel}**!`, embeds: [], components: [], ephemeral: true })
 
 				} else if (restartUserConfirmation.customId === 'cancel') {
 					await restartUserConfirmation.update({ content: 'Action cancelled', embeds: [], components: [] });
