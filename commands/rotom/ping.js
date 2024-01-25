@@ -164,7 +164,7 @@ module.exports = {
 				}
 
 				//await interaction.deleteReply();
-				const userConfirmation = await interaction.followUp({ content: `⚠️ Are you sure, you want to run **${selectedJob} on ${selectionLabel}**?`, embeds: [], components: [ confirmRestart ], ephemeral: true });
+				const userConfirmation = await interaction.editReply({ content: `⚠️ Are you sure, you want to run **${selectedJob} on ${selectionLabel}**?`, embeds: [], components: [ confirmRestart ], ephemeral: true });
 
 				// Confirm Restart
 				try {
