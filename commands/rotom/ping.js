@@ -173,11 +173,11 @@ module.exports = {
 					if (restartUserConfirmation.customId === 'yes') {
 						console.log(`${restartUserConfirmation.user.username} confirmed!`)
 						await restartUserConfirmation.deferReply({ ephemeral: true });
-						await userConfirmation.deleteReply();
+						//await userConfirmation.deleteReply();
 						//await restartUserConfirmation.deleteReply();
 
 						//run job on device here
-						if (selection === "all"){
+						if (selectedDeviceName === "all"){
 							console.log("Looping all devices.");
 							for (let dev = 0; dev < rotomStatus.devices.length; dev++) {
 								console.log(`Perform action on ${rotomStatus.devices[dev].deviceId} now!`);
@@ -194,7 +194,7 @@ module.exports = {
 								}							
 							}
 						} else {
-							console.log(`Run job on ${selection} now!`);
+							console.log(`Run job on ${selectedDeviceName} now!`);
 							try {
 							    //let response = await fetch(rotom.address + '/api/device/' + selection + '/action/' + action, {
 								//    method: "POST"
@@ -215,7 +215,8 @@ module.exports = {
 					}
 
 				} catch (e) {
-					await interaction.editReply({ content: 'Confirmation not received within 1 minute, cancelling', embeds: [], components: [] });
+					console.log(e)
+					//await interaction.editReply({ content: 'Confirmation not received within 1 minute, cancelling', embeds: [], components: [] });
 				}
 
 

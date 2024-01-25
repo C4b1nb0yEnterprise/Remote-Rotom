@@ -127,8 +127,9 @@ module.exports = {
 
 		// Get Job selection
 		const responseJobInteraction = await interaction.reply({ 
-			content: `**Which Job do you want to run?**\nOnly shows first 25 jobs of your instance.`, 
-			components: [ jobSelectionMenu ],
+			content: `**Please select Job and Device to run?**\nOnly shows first 25 jobs of your instance.\nDevices online: ${deviceOnlineCounter}/${rotomStatus.devices.length}`, 
+			components: [ jobSelectionMenu, deviceSelectionMenu ],
+			embeds: deviceEmbeds, 
 			ephemeral: true 
 		});
 
@@ -138,26 +139,27 @@ module.exports = {
 		const collectorJob = responseJobInteraction.createMessageComponentCollector({ filter: collectorFilter, componentType: ComponentType.StringSelect, time: 3_600_000 });
 
 		collectorJob.on('collect', async j => {
-			const selection = j.values[0];
-			console.log(`${j.user.username} has selected ${selection}!`);
+			const selectedJob = j.values[0];
+			const selectedDevice = j.values[1];
+			console.log(`${j.user.username} has selected ${selectedJob} on ${selectedDevice} !`);
 
-			if (jobIdList.includes(selection)){
-				console.log("Job was selected!");
-				let selectedJob = selection;
+			// if (jobIdList.includes(selection)){
+			// 	console.log("Job was selected!");
+			// 	let selectedJob = selection;
 
-				await interaction.editReply({ 
-					content: `**On which Device do you want to run the job?**\nDevices online: ${deviceOnlineCounter}/${rotomStatus.devices.length}`, 
-					components: [ deviceSelectionMenu ], 
-					embeds: deviceEmbeds, 
-					ephemeral: true 
-				});
-			}
+			// 	await interaction.editReply({ 
+			// 		content: `**On which Device do you want to run the job?**\nDevices online: ${deviceOnlineCounter}/${rotomStatus.devices.length}`, 
+			// 		components: [ deviceSelectionMenu ], 
+			// 		embeds: deviceEmbeds, 
+			// 		ephemeral: true 
+			// 	});
+			// }
 
-			if (selection === "all" || rotomStatus.devices.find(item => item.deviceId === selection)){
+			if (selectedDevice === "all" || rotomStatus.devices.find(item => item.deviceId === selectedDevice)){
 				let selectionLabel = "all devices";
 
-				if (selection != "all"){
-					let selectedDevice = rotomStatus.devices.find(item => item.deviceId === selection);
+				if (selectedDevice != "all"){
+					let selectedDevice = rotomStatus.devices.find(item => item.deviceId === selectedDevice);
 					selectionLabel = selectedDevice.origin;
 				}
 
@@ -179,7 +181,7 @@ module.exports = {
 						//await userConfirmation.deleteReply();
 
 						//restart device here
-						if (selection === "all"){
+						if (selectedDevice === "all"){
 							console.log("Looping all devices.");
 							for (let dev = 0; dev < rotomStatus.devices.length; dev++) {
 								console.log(`Run Job on ${rotomStatus.devices[dev].deviceId} now!`);
@@ -197,12 +199,12 @@ module.exports = {
 								}							
 							}
 						} else {
-							console.log(`Run Job on ${selection} now!`);
+							console.log(`Run Job on ${selectedDevice} now!`);
 
 							try {
 							    let response = await fetch(rotom.address + '/api/job/execute/' + jobSelected, {
 								    method: "POST",
-								    body: JSON.stringify({deviceIdsOrOrigins: [ selection ]})
+								    body: JSON.stringify({deviceIdsOrOrigins: [ selectedDevice ]})
 								});
 							    if (!response.ok) {
 							      	throw new Error("Network response was not OK");
