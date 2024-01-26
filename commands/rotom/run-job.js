@@ -177,32 +177,48 @@ module.exports = {
 				console.log("He said yes!");
 				
 				if (selectionDevice === "all"){
+					let allDeviceIds = [];
 					// Run Job for all devices
 					console.log("Looping all devices.");
 					for (let dev = 0; dev < rotomStatus.devices.length; dev++) {
-						console.log(`Run ${selectionJob} on ${rotomStatus.devices[dev].deviceId} now!`);
-
-						try {
-						    // let response = await fetch(rotom.address + '/api/device/' + rotomStatus.devices[dev].deviceId + '/action/' + action, {
-							//     method: "POST"
-							// });
-						    // if (!response.ok) {
-						    //   	throw new Error("Network response was not OK");
-						    //   }
-						  } catch (error) {
-						    console.error("There has been a problem with your fetch operation:", error);
-						}							
+						allDeviceIds.push(rotomStatus.devices[dev].deviceId);
 					}
+
+					console.log(allDeviceIds);
+
+					try {
+						console.log(rotom.address + '/api/job/execute/' + selectionJob);
+					    let response = await fetch(rotom.address + '/api/job/execute/' + selectionJob, {
+						    method: "POST",
+						    headers: {
+						          'Accept': 'application/json',
+						          'Content-Type': 'application/json'
+						        },
+						    body: JSON.stringify({deviceIdsOrOrigins: allDeviceIds})
+						});
+					    if (!response.ok) {
+					    	console.log(response);
+					      	throw new Error("Network response was not OK");
+					      }
+					  } catch (error) {
+					    console.error("There has been a problem with your fetch operation:", error);
+					}							
+
 				} else {
 					// Run Job on selected devices
 					console.log(`Run ${selectionJob} on ${selectedDevice.origin} now!`);
 					try {
-					    // let response = await fetch(rotom.address + '/api/device/' + selection + '/action/' + action, {
-						//     method: "POST"
-						// });
-					    // if (!response.ok) {
-					    //   	throw new Error("Network response was not OK");
-					    //  }
+					    let response = await fetch(rotom.address + '/api/job/execute/' + selectionJob, {
+						    method: "POST",
+						    headers: {
+						          'Accept': 'application/json',
+						          'Content-Type': 'application/json'
+						        },
+						    body: JSON.stringify({deviceIdsOrOrigins: [selectedDevice.origin]})
+						});
+					    if (!response.ok) {
+					      	throw new Error("Network response was not OK");
+					     }
 					  } catch (error) {
 					    console.error("There has been a problem with your fetch operation:", error);
 					}	
