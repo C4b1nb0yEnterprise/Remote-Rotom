@@ -97,8 +97,10 @@ module.exports = {
 		for (let dev = 0; dev < rotomStatus.devices.length; dev++){
 			
 			let deviceOnlineStatus = "Offline";
+			let deviceEmoji = "⛔";
 			if (rotomStatus.devices[dev].isAlive) {
 				deviceOnlineStatus = "Online";
+				deviceEmoji = "✅";
 			}
 
 			selectDevice.addOptions(
@@ -106,6 +108,7 @@ module.exports = {
 					.setLabel(rotomStatus.devices[dev].origin)
 					.setDescription(deviceOnlineStatus)
 					.setValue(rotomStatus.devices[dev].deviceId)
+					.setEmoji(deviceEmoji)
 			);
 
 		}
@@ -156,18 +159,56 @@ module.exports = {
 			console.log(`${i.user} has selected Device ${selectionDevice}!`);
 
 			let selectionLabel = "all Devices";
-
+			let selectedDevice = "";
 			if (selectionDevice != "all"){
-				let selectedDevice = rotomStatus.devices.find(item => item.deviceId === selectionDevice);
+				selectedDevice = rotomStatus.devices.find(item => item.deviceId === selectionDevice);
 				selectionLabel = selectedDevice.origin;
 			}
 
+			if (selectedDevice.isAlive === false){
+				const userConfirmation = await i.update({ content: `Sorry, the device ${selectedDevice.origin} is offline ⛔\nRunning jobs wouldn't work... Please try another device 📱`, embeds: [], components: [] });
+				return	
+			}
+			
 			const userConfirmation = await i.update({ content: `⚠️ Are you sure, you want to run **${selectionJob}** on **${selectionLabel}**?`, embeds: [], components: [ confirmRestart ] });
 
 			const restartUserConfirmation = await userConfirmation.awaitMessageComponent({ filter: collectorFilterConfirm, time: 180_000 });
 			if (restartUserConfirmation.customId === "yes"){
 				console.log("He said yes!");
-				await i.editReply({ content: `✅ Successfully ran **${selectionJob}** on **${selectionLabel}**!`, embeds: [], components: [], ephemeral: true })
+				
+				if (selectionDevice === "all"){
+					// Run Job for all devices
+					console.log("Looping all devices.");
+					for (let dev = 0; dev < rotomStatus.devices.length; dev++) {
+						console.log(`Run ${selectionJob} on ${rotomStatus.devices[dev].deviceId} now!`);
+
+						try {
+						    // let response = await fetch(rotom.address + '/api/device/' + rotomStatus.devices[dev].deviceId + '/action/' + action, {
+							//     method: "POST"
+							// });
+						    // if (!response.ok) {
+						    //   	throw new Error("Network response was not OK");
+						    //   }
+						  } catch (error) {
+						    console.error("There has been a problem with your fetch operation:", error);
+						}							
+					}
+				} else {
+					// Run Job on selected devices
+					console.log(`Run ${selectionJob} on ${selectedDevice.origin} now!`);
+					try {
+					    // let response = await fetch(rotom.address + '/api/device/' + selection + '/action/' + action, {
+						//     method: "POST"
+						// });
+					    // if (!response.ok) {
+					    //   	throw new Error("Network response was not OK");
+					    //  }
+					  } catch (error) {
+					    console.error("There has been a problem with your fetch operation:", error);
+					}	
+				}
+
+				await i.editReply({ content: `✅ Successfully ran **${selectionJob}** on **${selectionLabel}**!`, embeds: [], components: [] })
 
 			} else if (restartUserConfirmation.customId === "cancel"){
 				console.log("He said no...");

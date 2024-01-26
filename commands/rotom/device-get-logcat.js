@@ -62,8 +62,10 @@ module.exports = {
 		for (let dev = 0; dev < rotomStatus.devices.length; dev++){
 			
 			let deviceOnlineStatus = "Offline";
+			let deviceEmoji = "⛔";
 			if (rotomStatus.devices[dev].isAlive) {
 				deviceOnlineStatus = "Online";
+				deviceEmoji = "✅";
 			}
 
 			deviceSelect.addOptions(
@@ -71,6 +73,7 @@ module.exports = {
 					.setLabel(rotomStatus.devices[dev].origin)
 					.setDescription(deviceOnlineStatus)
 					.setValue(rotomStatus.devices[dev].deviceId)
+					.setEmoji(deviceEmoji)
 			);
 
 		}
