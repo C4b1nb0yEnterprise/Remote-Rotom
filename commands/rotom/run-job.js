@@ -130,7 +130,7 @@ module.exports = {
 		//await interaction.deferReply()
 		//await interaction.deferReply();
 		const responseJobSelect = await interaction.reply({
-			content: `**Please select Job to run.**\nOnly shows first 25 jobs of your instance.`, 
+			content: `**Please select a Job to run.**\nOnly shows first 25 jobs of your instance.`, 
 			components: [ jobSelect ],
 			ephemeral: true 
 		});
@@ -148,18 +148,26 @@ module.exports = {
 		collectorJobSelect.on('collect', async i => {
 			selectionJob = i.values[0];
 			console.log(`${i.user} has selected Job ${selectionJob}!`);
-			await i.update({content: `Please select Device:`, components: [deviceSelect], embeds: deviceEmbeds, ephemeral: true });
+			await i.update({content: `**Please select one or all Device.**\nDevices online: ${deviceOnlineCounter}/${rotomStatus.devices.length}`, components: [deviceSelect], embeds: deviceEmbeds, ephemeral: true });
 		});
 
 		collectorDeviceSelect.on('collect', async i => {
 			selectionDevice = i.values[0];
 			console.log(`${i.user} has selected Device ${selectionDevice}!`);
-			const userConfirmation = await i.update({ content: `⚠️ Are you sure, you want to run **${selectionJob}** on **${selectionDevice}**?`, embeds: [], components: [ confirmRestart ] });
+
+			let selectionLabel = "all Devices";
+
+			if (selectionDevice != "all"){
+				let selectedDevice = rotomStatus.devices.find(item => item.deviceId === selectionDevice);
+				selectionLabel = selectedDevice.origin;
+			}
+
+			const userConfirmation = await i.update({ content: `⚠️ Are you sure, you want to run **${selectionJob}** on **${selectionLabel}**?`, embeds: [], components: [ confirmRestart ] });
 
 			const restartUserConfirmation = await userConfirmation.awaitMessageComponent({ filter: collectorFilterConfirm, time: 180_000 });
 			if (restartUserConfirmation.customId === "yes"){
 				console.log("He said yes!");
-				await i.editReply({ content: `✅ Successfully ran **${selectionJob}** on **${selectionDevice}**!`, embeds: [], components: [], ephemeral: true })
+				await i.editReply({ content: `✅ Successfully ran **${selectionJob}** on **${selectionLabel}**!`, embeds: [], components: [], ephemeral: true })
 
 			} else if (restartUserConfirmation.customId === "cancel"){
 				console.log("He said no...");
