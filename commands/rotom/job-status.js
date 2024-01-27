@@ -33,34 +33,44 @@ module.exports = {
 				jobsActiveCounter++
 				jobsEmbed
 					.setColor("Blue")
-					.setTitle(`⏱️ ${rotomJobStatus[job].jobId} is processing`)
+					.setTitle(`⏱️ ${rotomJobStatus[job].jobId} is processing...`)
 					.addFields({ name: '📱 Device ID', value: rotomJobStatus[job].deviceOrigin, inline: false })
 					.addFields({ name: '🧰 Job', value: rotomJobStatus[job].jobId, inline: false })
 					.setThumbnail()
 					.setTimestamp()
-					.setFooter({ text: `${rotomJobStatus[job].jobId} @ ${rotomJobStatus[job].deviceOrigin}`});
+					.setFooter({ text: `${rotomJobStatus[job].jobId} @ 📱${rotomJobStatus[job].deviceOrigin}`});
 			} else  if (rotomJobStatus[job].success) {
 				console.log(`Job ${rotomJobStatus[job].jobId} completed successfully.`)
 				jobsEmbed
 					.setColor("Green")
 					.setTitle(`✅ ${rotomJobStatus[job].jobId} completed successfully!`)
 					.addFields({ name: '📱 Device ID', value: rotomJobStatus[job].deviceOrigin, inline: false })
-					.addFields({ name: '🧰 Job', value: rotomJobStatus[job].jobId, inline: false })
-					.addFields({ name: '📝 Results', value: rotomJobStatus[job].result, inline: false })
+					.addFields({ name: '🧰 Job', value: rotomJobStatus[job].jobId, inline: false });
+					
+				if (rotomJobStatus[job].result){
+					jobsEmbed.addFields({ name: '📝 Results', value: rotomJobStatus[job].result, inline: false });
+				}
+
+				jobsEmbed
 					.setThumbnail()
 					.setTimestamp()
-					.setFooter({ text: `${rotomJobStatus[job].jobId} @ ${rotomJobStatus[job].deviceOrigin}`});
+					.setFooter({ text: `${rotomJobStatus[job].jobId} @ 📱${rotomJobStatus[job].deviceOrigin}`});
 			} else {
-				console.log(`Job ${rotomJobStatus[job].jobId} is done`)
+				console.log(`Job ${rotomJobStatus[job].jobId} is done but failed`)
 				jobsEmbed
 					.setColor("Red")
 					.setTitle(`❗${rotomJobStatus[job].jobId} failed!`)
 					.addFields({ name: '📱 Device ID', value: rotomJobStatus[job].deviceOrigin, inline: false })
 					.addFields({ name: '🧰 Job', value: rotomJobStatus[job].jobId, inline: false })
-					.addFields({ name: '📝 Results', value: rotomJobStatus[job].result, inline: false })
+					.addFields({ name: '📝 Results', value: rotomJobStatus[job].result, inline: false });
+
+				if (rotomJobStatus[job].result){
+					jobsEmbed.addFields({ name: '📝 Results', value: rotomJobStatus[job].result, inline: false });
+				}
+				jobsEmbed
 					.setThumbnail()
 					.setTimestamp()
-					.setFooter({ text: `${rotomJobStatus[job].jobId} @ ${rotomJobStatus[job].deviceOrigin}`});
+					.setFooter({ text: `${rotomJobStatus[job].jobId} @ 📱${rotomJobStatus[job].deviceOrigin}`});
 			}
 
 				jobsEmbeds.push(jobsEmbed);
