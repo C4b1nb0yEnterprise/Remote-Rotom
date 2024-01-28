@@ -14,6 +14,21 @@ async function checkDeviceStatus (client, deviceAlertChannel, alertRole, deviceC
 	console.log("Checking Device Status...");
 
 	const response = await fetch(rotom.address + "/api/status");
+
+	if (!response || response.status != 200){
+		console.log("[WARNING] Rotom is offline! Cannot process request...")
+		let messageRotomDown = "";
+		if (alertRole){
+			messageRotomDown = `**⚠️ Attention <@&${alertRole}>! Rotom is offline!**\nCannot process commands or check status 😔`;
+		} else {
+			messageRotomDown = `**⚠️ Attention! One or more Devices or Worker are offline!**\nDevices offline: ${deviceOfflineCounter}/${rotomStatus.devices.length}\nWorker offline: ${workerOfflineCounter}/${rotomStatus.workers.length}`;
+		}
+		await client.channels.cache.get(deviceAlertChannel).send({content: messageRotomDown, ephemeral: true });
+		return
+	} else {
+		console.log("Fetched device status.");
+	}
+
 	const rotomStatus = await response.json();
 	
 	let deviceEmbeds = [];

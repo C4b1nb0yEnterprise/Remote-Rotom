@@ -2,8 +2,9 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { REST, Routes, Client, Collection, Events, GatewayIntentBits } = require('discord.js');
-const { clientId, guildId, token, rotom, commandPermissionRole } = require('./config.json');
+const { clientId, guildId, token, rotom, commandPermissionRole, deviceAlerts } = require('./config.json');
 const isReachable = require('is-reachable');
+const { checkDeviceStatus } = require('./utilities/deviceAlert')
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -56,6 +57,12 @@ client.once(Events.ClientReady, readyClient => {
 			console.error(error);
 		}
 	})();
+
+	// start deviceCheck if enabled
+	if (deviceAlerts.enableDeviceCheck){
+		console.log("Device check enabled!")
+		let deviceAlertInterval = setInterval(checkDeviceStatus, deviceAlerts.deviceCheckInterval*60000, client, deviceAlerts.deviceAlertChannel, deviceAlerts.deviceAlertRole, deviceAlerts.deviceCheckInterval );
+	}
 });
 
 client.on(Events.InteractionCreate, async interaction => {
@@ -68,13 +75,13 @@ client.on(Events.InteractionCreate, async interaction => {
 	}
 
 	let rotomStatus = await isReachable(rotom.address, {timeout: 2000});
-		if (rotomStatus == true){
-			console.log("Rotom is online.")
-		} else {
-			console.log("[WARNING] Rotom is offline! Cannot process request...")
-			await interaction.reply({content: "Sorry, Rotom is unavailable right now! Cannot execute task 😔", ephemeral: true });
-			return
-		}
+	if (rotomStatus == true){
+		console.log("Rotom is online.")
+	} else {
+		console.log("[WARNING] Rotom is offline! Cannot process request...")
+		await interaction.reply({content: "Sorry, Rotom is unavailable right now! Cannot execute task 😔", ephemeral: true });
+		return
+	}
 
 
 	const command = interaction.client.commands.get(interaction.commandName);
