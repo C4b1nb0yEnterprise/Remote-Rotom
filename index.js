@@ -61,7 +61,7 @@ client.once(Events.ClientReady, readyClient => {
 	// start deviceCheck if enabled
 	if (deviceAlerts.enableDeviceCheck){
 		console.log("Device check enabled!")
-		let deviceAlertInterval = setInterval(checkDeviceStatus, deviceAlerts.deviceCheckInterval*60000, client, deviceAlerts.deviceAlertChannel, deviceAlerts.deviceAlertRole, deviceAlerts.deviceCheckInterval );
+		let deviceAlertInterval = setInterval(checkDeviceStatus, deviceAlerts.deviceCheckInterval*60000, client );
 	}
 });
 

@@ -9,7 +9,15 @@
 	"deviceAlerts":{
 		"enableDeviceCheck": false,
 		"deviceCheckInterval": 60,
-		"deviceAlertChannel": "",
-		"deviceAlertRole": ""
+		"deviceAlertChannel": "your-discord-channel-id-goes-here",
+		"deviceAlertRole": "your-discord-role-id-goes-here",
+		"enablePowerCycle": false,
+		"powercylceAfterDeviceDowntime": 45,
+		"devices": [
+			{
+				"origin": "your-device-origin-goes-here",
+				"webhookPowerOff": "your-power-off-webhook-goes-here",
+				"webhookPowerOn": "your-power-on-webhook-goes-here"
+			}
+		]
 	}
-}

@@ -1,34 +1,37 @@
-const { rotom } = require('../config.json');
+const { rotom, deviceAlerts } = require('../config.json');
+const wait = require('node:timers/promises').setTimeout;
 const { EmbedBuilder, SlashCommandBuilder, time } = require('discord.js');
+const isReachable = require('is-reachable');
 
-async function checkDeviceStatus (client, deviceAlertChannel, alertRole, deviceCheckInterval){
-	if (!deviceAlertChannel){
+async function checkDeviceStatus (client){
+	if (!deviceAlerts.deviceAlertChannel){
 		console.log("No channel in config. Not gonna send anything.");
 		return;
 	}
 
-	if (alertRole){
-		console.log("This role needs to be mentioned: ", alertRole);
+	if (deviceAlerts.deviceAlertRole){
+		console.log("This role needs to be mentioned: ", deviceAlerts.deviceAlertRole);
 	}
 
 	console.log("Checking Device Status...");
 
-	const response = await fetch(rotom.address + "/api/status");
-
-	if (!response || response.status != 200){
+	let rotomPing = await isReachable(rotom.address, {timeout: 2000});
+	if (rotomPing == true){
+		console.log("Rotom is online.")
+	} else {
 		console.log("[WARNING] Rotom is offline! Cannot process request...")
 		let messageRotomDown = "";
-		if (alertRole){
-			messageRotomDown = `**⚠️ Attention <@&${alertRole}>! Rotom is offline!**\nCannot process commands or check status 😔`;
+		//console.log(deviceAlerts.deviceAlertRole);
+		if (deviceAlerts.deviceAlertRole){
+			messageRotomDown = `**⚠️ Attention <@&${deviceAlerts.deviceAlertRole}>! Rotom is offline!**\nCannot process commands or check status 😔`;
 		} else {
-			messageRotomDown = `**⚠️ Attention! One or more Devices or Worker are offline!**\nDevices offline: ${deviceOfflineCounter}/${rotomStatus.devices.length}\nWorker offline: ${workerOfflineCounter}/${rotomStatus.workers.length}`;
+			messageRotomDown = `**⚠️ Attention! Rotom is offline!**\nCannot process commands or check status 😔`;
 		}
-		await client.channels.cache.get(deviceAlertChannel).send({content: messageRotomDown, ephemeral: true });
+		await client.channels.cache.get(deviceAlerts.deviceAlertChannel).send({content: messageRotomDown, ephemeral: true });
 		return
-	} else {
-		console.log("Fetched device status.");
 	}
 
+	const response = await fetch(rotom.address + "/api/status");
 	const rotomStatus = await response.json();
 	
 	let deviceEmbeds = [];
@@ -110,15 +113,40 @@ async function checkDeviceStatus (client, deviceAlertChannel, alertRole, deviceC
 
 	if (deviceOfflineCounter > 0 || workerOfflineCounter > 0) {
 		let message = "";
-		if (alertRole){
-			message = `**⚠️ Attention <@&${alertRole}>! One or more Devices or Worker are offline!**\nDevices offline: ${deviceOfflineCounter}/${rotomStatus.devices.length}\nWorker offline: ${workerOfflineCounter}/${rotomStatus.workers.length}`;
+		if (deviceAlerts.deviceAlertRole){
+			message = `**⚠️ Attention <@&${deviceAlerts.deviceAlertRole}>! One or more Devices or Worker are offline!**\nDevices offline: ${deviceOfflineCounter}/${rotomStatus.devices.length}\nWorker offline: ${workerOfflineCounter}/${rotomStatus.workers.length}`;
 		} else {
 			message = `**⚠️ Attention! One or more Devices or Worker are offline!**\nDevices offline: ${deviceOfflineCounter}/${rotomStatus.devices.length}\nWorker offline: ${workerOfflineCounter}/${rotomStatus.workers.length}`;
 		}
-		const alertMessage = await client.channels.cache.get(deviceAlertChannel).send({content: message, embeds: deviceEmbeds});
+		const alertMessage = await client.channels.cache.get(deviceAlerts.deviceAlertChannel).send({content: message, embeds: deviceEmbeds});
 	} else {
 		console.log("...all good! noting to do.");
 	}
+
+
+	if (deviceAlerts.enablePowerCycle){
+		//check for each offline device if downtime passed
+		for (let i=0; i< rotomStatus.devices.length; i++){
+			if (rotomStatus.devices[i].isAlive === false && Math.round( new Date() - rotomStatus.devices[i].dateLastMessageReceived) >= deviceAlerts.powercylceAfterDeviceDowntime * 60000 ) { 												//Math.round(rotomStatus.devices[i].dateLastMessageReceived / 60_000 >= deviceAlerts.powercylceAfterDeviceDowntime
+				if (deviceAlerts.devices.length > 0){
+					let rebootDeviceData = deviceAlerts.devices.find(item => item.origin === rotomStatus.devices[i].origin);
+					if (rebootDeviceData) {
+						console.log("Found the origin in the config!");
+						if (rebootDeviceData.webhookPowerOff && rebootDeviceData.webhookPowerOn) {
+							console.log(`Trigger Recycle for device ${rotomStatus.devices[i].origin} now`);
+							const powercycleMessage = await client.channels.cache.get(deviceAlerts.deviceAlertChannel).send({content: `**⚠️ Attention <@&${deviceAlerts.deviceAlertRole}>!**\nDevice **${rotomStatus.devices[i].origin}** hasn't send data since **${time(Math.round(rotomStatus.devices[i].dateLastMessageReceived / 1000), 'R')}**. Will trigger powercycle now!`});
+							await fetch(rebootDeviceData.webhookPowerOff);
+							await wait(5_000);
+							await fetch(rebootDeviceData.webhookPowerOn);
+						} else {
+							console.log("No power-cycle setup present for this device.")
+						}
+					}
+				}			
+			}
+		}
+	}
+
 	return
 }
 
