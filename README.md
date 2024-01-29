@@ -1,6 +1,6 @@
 # Remote-Rotom
 
-Remote-Rotom is a Discord bot built with [Discord.js](https://discord.js.org) for [Rotom](https://github.com/UnownHash/Rotom) by UnownHash.
+Remote-Rotom is a Discord bot for [Rotom](https://github.com/UnownHash/Rotom) by UnownHash, built with [Discord.js](https://discord.js.org).
 
 ## Features
 - Only accepts interactions from users with a specific Discord role.
