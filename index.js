@@ -1,4 +1,3 @@
-// Require the necessary discord.js classes
 const fs = require('node:fs');
 const path = require('node:path');
 const { REST, Routes, Client, Collection, Events, GatewayIntentBits } = require('discord.js');
@@ -9,6 +8,7 @@ const { checkDeviceStatus } = require('./utilities/deviceAlert')
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
+// Import commands from command folder
 const commands = [];
 client.commands = new Collection();
 
@@ -31,9 +31,7 @@ for (const folder of commandFolders) {
 	}
 }
 
-// When the client is ready, run this code (only once).
-// The distinction between `client: Client<boolean>` and `readyClient: Client<true>` is important for TypeScript developers.
-// It makes some properties non-nullable.
+// When the client is ready
 client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 
@@ -58,32 +56,35 @@ client.once(Events.ClientReady, readyClient => {
 		}
 	})();
 
-	// start deviceCheck if enabled
+	// start device check if enabled
 	if (deviceAlerts.enableDeviceCheck){
 		console.log("Device check enabled!")
 		let deviceAlertInterval = setInterval(checkDeviceStatus, deviceAlerts.deviceCheckInterval*60000, client );
 	}
 });
 
+// When client receives interaction event
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
 
+	// check if user is allowed to execute commands, or send error message
 	if (!interaction.member.roles.cache.has(commandPermissionRole)){
 		console.log(`The user ${interaction.user.username}'s is not allowed to use Slash Commands.`);
 		await interaction.reply({content: "Sorry, you are not allowed to use this Slash Command 😔", ephemeral: true });
 		return
 	}
 
+	// check if Rotom is online, or send error message
 	let rotomStatus = await isReachable(rotom.address, {timeout: 2000});
 	if (rotomStatus == true){
-		console.log("Rotom is online.")
+		console.log("Rotom is online, processing reqeust...")
 	} else {
 		console.log("[WARNING] Rotom is offline! Cannot process request...")
 		await interaction.reply({content: "Sorry, Rotom is unavailable right now! Cannot execute task 😔", ephemeral: true });
 		return
 	}
 
-
+	// get command
 	const command = interaction.client.commands.get(interaction.commandName);
 
 	if (!command) {
@@ -91,6 +92,7 @@ client.on(Events.InteractionCreate, async interaction => {
 		return;
 	}
 
+	// run command
 	try {
 		await command.execute(interaction);
 	} catch (error) {

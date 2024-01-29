@@ -13,8 +13,10 @@ module.exports = {
 		const response = await fetch(rotom.address + "/api/status");
 		const rotomStatus = await response.json();
 
+		// build rotom link
 		const rotomLink = hyperlink('Rotom', rotom.address);
 
+		// build device embeds
 		let deviceEmbeds = [];
 		let deviceOnlineCounter = 0;
 
@@ -29,7 +31,7 @@ module.exports = {
 			let deviceEmbed = new EmbedBuilder()
 			if (rotomStatus.devices[i].isAlive == true ) {
 				deviceOnlineCounter++
-				console.log(`Device ${rotomStatus.devices[i].origin} is alive`);
+				//console.log(`Device ${rotomStatus.devices[i].origin} is alive`);
 				deviceEmbed
 					.setColor("Green")
 					.setTitle(`✅ ${rotomStatus.devices[i].origin} is online`)
@@ -40,7 +42,7 @@ module.exports = {
 					.setTimestamp()
 					.setFooter({ text: rotomStatus.devices[i].origin, iconURL: 'https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/1.png' });
 			} else {
-				console.log(`Device ${rotomStatus.devices[i].origin} is offline`)
+				//console.log(`Device ${rotomStatus.devices[i].origin} is offline`)
 				deviceEmbed
 					.setColor("Red")
 					.setTitle(`⛔ ${rotomStatus.devices[i].origin} is offline`)
@@ -68,6 +70,7 @@ module.exports = {
 				deviceEmoji = "✅";
 			}
 
+			// add each device as option
 			deviceSelect.addOptions(
 				new StringSelectMenuOptionBuilder()
 					.setLabel(rotomStatus.devices[dev].origin)
@@ -81,8 +84,7 @@ module.exports = {
 		const deviceSelectionMenu = new ActionRowBuilder()
 			.addComponents( deviceSelect );
 
-		// interaction.user is the object representing the User who ran the command
-		// interaction.member is the GuildMember object, which represents the user in the specific guild
+		// send device selection
 		const responseInteraction = await interaction.reply({ 
 			content: `**From which Device do you want the logcat?**\nDevices online: ${deviceOnlineCounter}/${rotomStatus.devices.length}`, 
 			components: [ deviceSelectionMenu ], 
@@ -97,9 +99,11 @@ module.exports = {
 
 		collector.on('collect', async i => {
 			const selection = i.values[0];
+			// find selection in device list
 			let selectedDevice = rotomStatus.devices.find(item => item.deviceId === selection);
 			console.log(`${i.user.username} has selected Device ${selectedDevice.origin}`);
 
+			// send error if device is offline, or confirm request
 			if (selectedDevice.isAlive != true) {
 
 				await i.update({content: `Sorry, the device ${selectedDevice.origin} is offline ⛔\nRequesting Logcat wouldn't work... Please try another device 📱`, embeds: [], components: [], ephemeral: true });
@@ -108,11 +112,12 @@ module.exports = {
 
 				await i.update({content: `Fetching 🪵🐱 from device **${selectedDevice.origin}** now!\nYou will receive a DM as soon as it is ready 👍`, embeds: [], components: [], ephemeral: true });
 
-				// Get logcat here
+				// Get logcat
 				const logcatZip = await fetch(rotom.address + "/api/device/" + selectedDevice.deviceId + "/action/getLogcat", {
 							    method: "POST"
 							})
 				const zipBuffer = await logcatZip.buffer();
+				// attach to message and send as DM
 				const attachment = new AttachmentBuilder(zipBuffer, { name: `logcat-${selectedDevice.origin}.zip` });
 				console.log("Sending DM to ", interaction.user.username);
 				await i.user.send({content: `Hey there!👋\nHere is your 🪵🐱 from device **${selectedDevice.origin}**.`, files: [attachment]});

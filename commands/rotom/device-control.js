@@ -14,15 +14,18 @@ module.exports = {
 		)),
 	async execute(interaction) {
 
+		// get device action from user selection
 		const action = interaction.options.getString('action');
 		console.log(`User ${interaction.user.username} requested a device ${action}.`);
-		console.log(`User ${interaction.user.username} selected this action: `, action);
 
+		// get rotom device status
 		const response = await fetch(rotom.address + "/api/status");
 		const rotomStatus = await response.json();
 
+		// build rotom link
 		const rotomLink = hyperlink('Rotom', rotom.address);
 
+		// create device and worker embeds
 		let deviceEmbeds = [];
 		let deviceOnlineCounter = 0;
 
@@ -37,7 +40,7 @@ module.exports = {
 			let deviceEmbed = new EmbedBuilder()
 			if (rotomStatus.devices[i].isAlive == true ) {
 				deviceOnlineCounter++
-				console.log(`Device ${rotomStatus.devices[i].origin} is alive`);
+				//console.log(`Device ${rotomStatus.devices[i].origin} is alive`);
 				deviceEmbed
 					.setColor("Green")
 					.setTitle(`✅ ${rotomStatus.devices[i].origin} is online`)
@@ -48,7 +51,7 @@ module.exports = {
 					.setTimestamp()
 					.setFooter({ text: rotomStatus.devices[i].origin, iconURL: 'https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/1.png' });
 			} else {
-				console.log(`Device ${rotomStatus.devices[i].origin} is offline`)
+				//console.log(`Device ${rotomStatus.devices[i].origin} is offline`)
 				deviceEmbed
 					.setColor("Red")
 					.setTitle(`⛔ ${rotomStatus.devices[i].origin} is offline`)
@@ -63,6 +66,7 @@ module.exports = {
 
 		}
 
+		// create selections
 		const cancel = new ButtonBuilder()
 			.setCustomId('cancel')
 			.setLabel('Cancel')
@@ -105,8 +109,7 @@ module.exports = {
 		const deviceSelectionMenu = new ActionRowBuilder()
 			.addComponents( deviceSelect );
 
-		// interaction.user is the object representing the User who ran the command
-		// interaction.member is the GuildMember object, which represents the user in the specific guild
+		// send device selection message
 		const responseInteraction = await interaction.reply({ 
 			content: `**Which Device do you want to ${action}?**\nDevices online: ${deviceOnlineCounter}/${rotomStatus.devices.length}`, 
 			components: [ deviceSelectionMenu ], 
@@ -114,6 +117,7 @@ module.exports = {
 			ephemeral: true 
 		});
 
+		// collect the selection if user matches original sender
 		const collectorFilter = i => i.user.id === interaction.user.id;
 
 		// Get User Selection
@@ -121,8 +125,9 @@ module.exports = {
 
 		collector.on('collect', async i => {
 			const selection = i.values[0];
-			console.log(`${i.user.username} has selected ${selection}!`);
+			console.log(`${i.user.username} has selected Device ${selection}!`);
 
+			// handle labels etc if all devices selected
 			let selectionLabel = "all";
 
 			if (selection != "all"){
@@ -130,19 +135,21 @@ module.exports = {
 				selectionLabel = selectedDevice.origin;
 			}
 			
+			// send user confirmation
 			const userConfirmation = await i.update({ content: `⚠️ Are you sure, you want to **${action} ${selectionLabel}**?`, embeds: [], components: [ confirmRestart ] });
 
-			// Confirm Restart
+
+			// Await confirmation and trigger action
 			try {
 				const restartUserConfirmation = await userConfirmation.awaitMessageComponent({ filter: collectorFilter, time: 180_000 });
 
 				if (restartUserConfirmation.customId === 'yes') {
 					console.log(`${restartUserConfirmation.user.username} confirmed ${action}.`)
+					// defer reply for longer execution time
 					await restartUserConfirmation.deferReply({ ephemeral: true });
 					await interaction.deleteReply();
-					//await restartUserConfirmation.deleteReply();
 
-					//restart device here
+					//restart device
 					if (selection === "all"){
 						console.log("Looping all devices.");
 						for (let dev = 0; dev < rotomStatus.devices.length; dev++) {
@@ -161,7 +168,6 @@ module.exports = {
 						}
 					} else {
 						console.log(`${action} ${selection} now!`);
-						console.log(`${rotom.address}/api/device/${selection}/action/${action}`);
 						try {
 						    let response = await fetch(rotom.address + '/api/device/' + selection + '/action/' + action, {
 							    method: "POST"
@@ -177,6 +183,7 @@ module.exports = {
 					await restartUserConfirmation.editReply({ content: `✅ Successfully **${action}ed ${selectionLabel}**!`, embeds: [], components: [], ephemeral: true })
 
 				} else if (restartUserConfirmation.customId === 'cancel') {
+					console.log(`${i.user.username} has cancelled the action!`)
 					await restartUserConfirmation.update({ content: 'Action cancelled', embeds: [], components: [] });
 				}
 

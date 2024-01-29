@@ -9,11 +9,14 @@ module.exports = {
 
 		console.log(`User ${interaction.user.username} requested the device status.`);
 
+		// get rotom device status
 		const response = await fetch(rotom.address + "/api/status");
 		const rotomStatus = await response.json();
 
+		// build roto link
 		const rotomLink = hyperlink('Rotom', rotom.address);
 		
+		// build device and worker ermbeds
 		let deviceEmbeds = [];
 		let deviceOnlineCounter = 0;
 		let workerOnlineCounter = 0;
@@ -30,7 +33,7 @@ module.exports = {
 			
 			let deviceEmbed = new EmbedBuilder()
 			if (rotomStatus.devices[i].isAlive == true ) {
-				console.log(`Device ${rotomStatus.devices[i].origin} is alive`);
+				//console.log(`Device ${rotomStatus.devices[i].origin} is alive`);
 				deviceOnlineCounter++
 				deviceEmbed
 					.setColor("Green")
@@ -42,7 +45,7 @@ module.exports = {
 					.setTimestamp()
 					.setFooter({ text: rotomStatus.devices[i].origin, iconURL: 'https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/1.png' });
 			} else {
-				console.log(`Device ${rotomStatus.devices[i].origin} is offline`)
+				//console.log(`Device ${rotomStatus.devices[i].origin} is offline`)
 				deviceEmbed
 					.setColor("Red")
 					.setTitle(`⛔ ${rotomStatus.devices[i].origin} is offline`)
@@ -64,7 +67,7 @@ module.exports = {
 			
 			let deviceEmbed = new EmbedBuilder()
 			if (rotomStatus.workers[i].worker.isAlive == true && rotomStatus.workers[i].isAllocated == true ) {
-				console.log(`Device ${rotomStatus.workers[i].workerId} is active`);
+				//console.log(`Device ${rotomStatus.workers[i].workerId} is active`);
 				workerOnlineCounter++
 				deviceEmbed
 					.setColor("Grey")
@@ -76,7 +79,7 @@ module.exports = {
 					.setTimestamp()
 					.setFooter({ text: rotomStatus.workers[i].workerId, iconURL: 'https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/misc/grass.png' });
 			} else {
-				console.log(`Device ${rotomStatus.workers[i].workerId} is inactive`)
+				//console.log(`Device ${rotomStatus.workers[i].workerId} is inactive`)
 				deviceEmbed
 					.setColor("Orange")
 					.setTitle(`😴 ${rotomStatus.workers[i].workerId} is inactive`)
@@ -91,7 +94,7 @@ module.exports = {
 
 		}
 
-		//console.log(deviceEmbeds);
+		// send status message
 		const message = `**Status Overview from ${rotomLink}**\nDevices online: ${deviceOnlineCounter}/${rotomStatus.devices.length}\nWorker online: ${workerOnlineCounter}/${rotomStatus.workers.length}`;
 		await interaction.reply({content: message, embeds: deviceEmbeds, ephemeral: true });
 	},

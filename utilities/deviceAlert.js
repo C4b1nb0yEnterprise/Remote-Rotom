@@ -4,24 +4,22 @@ const { EmbedBuilder, SlashCommandBuilder, time } = require('discord.js');
 const isReachable = require('is-reachable');
 
 async function checkDeviceStatus (client){
+
+	// check if alert channel was provided 
 	if (!deviceAlerts.deviceAlertChannel){
 		console.log("No channel in config. Not gonna send anything.");
 		return;
 	}
 
-	if (deviceAlerts.deviceAlertRole){
-		console.log("This role needs to be mentioned: ", deviceAlerts.deviceAlertRole);
-	}
-
+	// get device status
 	console.log("Checking Device Status...");
-
+	// test if rotom is online, or send alert message
 	let rotomPing = await isReachable(rotom.address, {timeout: 2000});
 	if (rotomPing == true){
 		console.log("Rotom is online.")
 	} else {
 		console.log("[WARNING] Rotom is offline! Cannot process request...")
 		let messageRotomDown = "";
-		//console.log(deviceAlerts.deviceAlertRole);
 		if (deviceAlerts.deviceAlertRole){
 			messageRotomDown = `**⚠️ Attention <@&${deviceAlerts.deviceAlertRole}>! Rotom is offline!**\nCannot process commands or check status 😔`;
 		} else {
@@ -31,9 +29,12 @@ async function checkDeviceStatus (client){
 		return
 	}
 
+	// fetch device status
 	const response = await fetch(rotom.address + "/api/status");
 	const rotomStatus = await response.json();
 	
+
+	// Setup embeds for devices and workers
 	let deviceEmbeds = [];
 	let deviceOfflineCounter = 0;
 	let workerOfflineCounter = 0;
@@ -111,7 +112,9 @@ async function checkDeviceStatus (client){
 
 	}
 
+	// send alert message, if devices or worker are offline
 	if (deviceOfflineCounter > 0 || workerOfflineCounter > 0) {
+		console.log("... devices offline. Gonna send an alert message!")
 		let message = "";
 		if (deviceAlerts.deviceAlertRole){
 			message = `**⚠️ Attention <@&${deviceAlerts.deviceAlertRole}>! One or more Devices or Worker are offline!**\nDevices offline: ${deviceOfflineCounter}/${rotomStatus.devices.length}\nWorker offline: ${workerOfflineCounter}/${rotomStatus.workers.length}`;
@@ -123,11 +126,12 @@ async function checkDeviceStatus (client){
 		console.log("...all good! noting to do.");
 	}
 
-
+	// check if powercycle is enabled
 	if (deviceAlerts.enablePowerCycle){
 		//check for each offline device if downtime passed
 		for (let i=0; i< rotomStatus.devices.length; i++){
-			if (rotomStatus.devices[i].isAlive === false && Math.round( new Date() - rotomStatus.devices[i].dateLastMessageReceived) >= deviceAlerts.powercylceAfterDeviceDowntime * 60000 ) { 												//Math.round(rotomStatus.devices[i].dateLastMessageReceived / 60_000 >= deviceAlerts.powercylceAfterDeviceDowntime
+			if (rotomStatus.devices[i].isAlive === false && Math.round( new Date() - rotomStatus.devices[i].dateLastMessageReceived) >= deviceAlerts.powercylceAfterDeviceDowntime * 60000 ) {
+				// if device are set in config, search for a matching device origin and trigger the powercycle webhooks
 				if (deviceAlerts.devices.length > 0){
 					let rebootDeviceData = deviceAlerts.devices.find(item => item.origin === rotomStatus.devices[i].origin);
 					if (rebootDeviceData) {

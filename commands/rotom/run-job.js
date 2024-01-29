@@ -8,9 +8,11 @@ module.exports = {
 	async execute(interaction) {
 		console.log(`User ${interaction.user.username} requested a job execution.`);
 
+		// get device status
 		const response = await fetch(rotom.address + "/api/status");
 		const rotomStatus = await response.json();
 
+		// build embeds for devices and workers
 		let deviceEmbeds = [];
 		let deviceOnlineCounter = 0;
 
@@ -25,7 +27,7 @@ module.exports = {
 			let deviceEmbed = new EmbedBuilder()
 			if (rotomStatus.devices[i].isAlive == true ) {
 				deviceOnlineCounter++
-				console.log(`Device ${rotomStatus.devices[i].origin} is alive`);
+				//console.log(`Device ${rotomStatus.devices[i].origin} is alive`);
 				deviceEmbed
 					.setColor("Green")
 					.setTitle(`✅ ${rotomStatus.devices[i].origin} is online`)
@@ -36,7 +38,7 @@ module.exports = {
 					.setTimestamp()
 					.setFooter({ text: rotomStatus.devices[i].origin, iconURL: 'https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/1.png' });
 			} else {
-				console.log(`Device ${rotomStatus.devices[i].origin} is offline`)
+				//console.log(`Device ${rotomStatus.devices[i].origin} is offline`)
 				deviceEmbed
 					.setColor("Red")
 					.setTitle(`⛔ ${rotomStatus.devices[i].origin} is offline`)
@@ -66,7 +68,6 @@ module.exports = {
 		// Add each job as selection option
 		for (const job in rotomJobList) {
 			if (rotomJobList.hasOwnProperty(job)) {
-				console.log(`Found Job ${rotomJobList[job].id}`);
 				selectJob.addOptions(
 					new StringSelectMenuOptionBuilder()
 						.setLabel(rotomJobList[job].id)
@@ -75,6 +76,7 @@ module.exports = {
 				);
 				jobCounter++
 				jobIdList.push(rotomJobList[job].id);
+				// Discord limits the selection dropdown to 25
 				if (jobCounter >= 25) {
 					break;
 				}
@@ -84,6 +86,7 @@ module.exports = {
 		const jobSelect = new ActionRowBuilder()
 			.addComponents(selectJob);
 
+		// build device selection
 		const selectDevice = new StringSelectMenuBuilder()
 			.setCustomId('device')
 			.setPlaceholder('Select a device')
@@ -93,7 +96,7 @@ module.exports = {
 					.setDescription("Select all devices")
 					.setValue("all")
 			);
-		
+		// Add each device as selection option
 		for (let dev = 0; dev < rotomStatus.devices.length; dev++){
 			
 			let deviceOnlineStatus = "Offline";
@@ -130,14 +133,14 @@ module.exports = {
 		const confirmRestart = new ActionRowBuilder()
 			.addComponents( restartAllYes, cancel );
 
-		//await interaction.deferReply()
-		//await interaction.deferReply();
+		// send job selection
 		const responseJobSelect = await interaction.reply({
 			content: `**Please select a Job to run.**\nOnly shows first 25 jobs of your instance.`, 
 			components: [ jobSelect ],
 			ephemeral: true 
 		});
 
+		// filter for all selections
 		const collectorFilterJob = i => i.user.id === interaction.user.id && i.customId === 'job';
 		const collectorFilterDevice = i => i.user.id === interaction.user.id && i.customId === 'device';
 		const collectorFilterConfirm = i => i.user.id === interaction.user.id && i.customId === 'yes' || i.user.id === interaction.user.id && i.customId === 'cancel';
@@ -148,12 +151,14 @@ module.exports = {
 		let selectionJob = "";
 		let selectionDevice = "";
 
+		// collect job selection
 		collectorJobSelect.on('collect', async i => {
 			selectionJob = i.values[0];
 			console.log(`${i.user} has selected Job ${selectionJob}!`);
 			await i.update({content: `**Please select one or all Device.**\nDevices online: ${deviceOnlineCounter}/${rotomStatus.devices.length}`, components: [deviceSelect], embeds: deviceEmbeds, ephemeral: true });
 		});
 
+		// collect device selection
 		collectorDeviceSelect.on('collect', async i => {
 			selectionDevice = i.values[0];
 			console.log(`${i.user} has selected Device ${selectionDevice}!`);
@@ -165,16 +170,18 @@ module.exports = {
 				selectionLabel = selectedDevice.origin;
 			}
 
+			// check if device is online, else notify user
 			if (selectedDevice.isAlive === false){
 				const userConfirmation = await i.update({ content: `Sorry, the device ${selectedDevice.origin} is offline ⛔\nRunning jobs wouldn't work... Please try another device 📱`, embeds: [], components: [] });
 				return	
 			}
 			
+			// request user confirmation
 			const userConfirmation = await i.update({ content: `⚠️ Are you sure, you want to run **${selectionJob}** on **${selectionLabel}**?`, embeds: [], components: [ confirmRestart ] });
 
 			const restartUserConfirmation = await userConfirmation.awaitMessageComponent({ filter: collectorFilterConfirm, time: 180_000 });
 			if (restartUserConfirmation.customId === "yes"){
-				console.log("He said yes!");
+				console.log(`User ${interaction.user.username} confirmed!`);
 				
 				if (selectionDevice === "all"){
 					let allDeviceIds = [];
@@ -184,10 +191,7 @@ module.exports = {
 						allDeviceIds.push(rotomStatus.devices[dev].deviceId);
 					}
 
-					console.log(allDeviceIds);
-
 					try {
-						console.log(rotom.address + '/api/job/execute/' + selectionJob);
 					    let response = await fetch(rotom.address + '/api/job/execute/' + selectionJob, {
 						    method: "POST",
 						    headers: {

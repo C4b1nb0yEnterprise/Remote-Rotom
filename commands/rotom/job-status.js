@@ -9,24 +9,20 @@ module.exports = {
 
 		console.log(`User ${interaction.user.username} requested the job status.`);
 
+		// get job status
 		const response = await fetch(rotom.address + "/api/job/status");
 		const rotomJobStatus = await response.json();
 
-		console.log(rotomJobStatus);
-
+		// build rotom link
 		const rotomLink = hyperlink('Rotom', rotom.address);
 		
+		// build job embeds
 		let jobsEmbeds = [];
 		let jobsActiveCounter = 0;
 		let jobCounter = 0;
 
-		// sort device array
-		//rotomJobStatus.devices.sort((a, b) => a.origin.localeCompare(b.origin))
-			
-
 		for (const job in rotomJobStatus) {
 		if (rotomJobStatus.hasOwnProperty(job)) {
-			console.log(`Found Job ${rotomJobStatus[job].jobId}`);
 			let jobsEmbed = new EmbedBuilder()
 
 			if (rotomJobStatus[job].executionComplete == false ){
@@ -40,7 +36,7 @@ module.exports = {
 					.setTimestamp()
 					.setFooter({ text: `${rotomJobStatus[job].jobId} @ 📱${rotomJobStatus[job].deviceOrigin}`});
 			} else  if (rotomJobStatus[job].success) {
-				console.log(`Job ${rotomJobStatus[job].jobId} completed successfully.`)
+				//console.log(`Job ${rotomJobStatus[job].jobId} completed successfully.`)
 				jobsEmbed
 					.setColor("Green")
 					.setTitle(`✅ ${rotomJobStatus[job].jobId} completed successfully!`)
@@ -56,7 +52,7 @@ module.exports = {
 					.setTimestamp()
 					.setFooter({ text: `${rotomJobStatus[job].jobId} @ 📱${rotomJobStatus[job].deviceOrigin}`});
 			} else {
-				console.log(`Job ${rotomJobStatus[job].jobId} is done but failed`)
+				//console.log(`Job ${rotomJobStatus[job].jobId} is done but failed`)
 				jobsEmbed
 					.setColor("Red")
 					.setTitle(`❗${rotomJobStatus[job].jobId} failed!`)
@@ -83,8 +79,7 @@ module.exports = {
 			}
 		}
 
-
-		//console.log(jobsEmbeds);
+		// send status message
 		const message = `**Status Overview from ${rotomLink}**\nJobs active: ${jobsActiveCounter}/${jobCounter}`;
 		await interaction.reply({content: message, embeds: jobsEmbeds, ephemeral: true });
 	},
