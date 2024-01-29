@@ -51,7 +51,7 @@ Values for `deviceCheckInterval` and `powerCycleAfterDeviceDowntime` are in minu
 - `/job-status`: Shows overall status for the latest Rotom jobs with detailed embeds for each job.
 
 ## Device Alerts & Powercycle
-If `enableDeviceCheck` is `true` and a time is set for `deviceCheckInterval`, the bot checks Rotom and device status. Alerts are sent to `deviceAlertChannel`, mentioning `deviceAlertRole` if set. Power cycle requires device check to be enabled. If Powercycle is enabled, the bot will search the device origin of offline devices and trigger the associated power on/off Webhooks.
+If `enableDeviceCheck` is `true` and a time is set for `deviceCheckInterval`, the bot checks Rotom and device status on interval. Alerts are sent to `deviceAlertChannel`, mentioning `deviceAlertRole` if set. Power cycle requires device check to be enabled. If configured, the bot will search for the device origin of each offline device, and trigger the associated webhooks for power off and on.
 
 ## Contribution
 I am writing this bot in my spare time, for fun and to learn more about nodejs. So, this code will be far from being „good“ and needs every support it can get 🙃 please feel free to contribute in any way by opening a PR or creating an issue! 
