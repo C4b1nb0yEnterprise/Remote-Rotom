@@ -1,6 +1,6 @@
 # Remote-Rotom
 
-Remote-Rotom is a Discord bot for [Rotom](https://github.com/UnownHash/Rotom) by UnownHash, built with [Discord.js](https://discord.js.org).
+Remote-Rotom is an unofficial Discord bot for [Rotom](https://github.com/UnownHash/Rotom) by UnownHash, built with [Discord.js](https://discord.js.org).
 
 ## Features
 - Only accepts interactions from users with a specific Discord role.
@@ -52,6 +52,7 @@ Values for `deviceCheckInterval` and `powerCycleAfterDeviceDowntime` are in minu
 
 ## Device Alerts & Powercycle
 If `enableDeviceCheck` is `true` and a time is set for `deviceCheckInterval`, the bot checks Rotom and device status on interval. Alerts are sent to `deviceAlertChannel`, mentioning `deviceAlertRole` if set. Power cycle requires device check to be enabled. If configured, the bot will search for the device origin of each offline device, and trigger the associated webhooks for power off and on.
+Currently, alert messages won't be deleted automatically. I recommand setting up an Auto-Delete bot like [EAZYAUTODELETE](https://eazyautodelete.xyz) for this channel!
 
 ## Contribution
 I am writing this bot in my spare time, for fun and to learn more about nodejs. So, this code will be far from being „good“ and needs every support it can get 🙃 please feel free to contribute in any way by opening a PR or creating an issue! 
