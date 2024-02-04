@@ -6,6 +6,8 @@
 		"address":"http://rotom:7072"
 	},
 	"commandPermissionRole":"your-discord-role-id-goes-here",
+	"deviceDetails": true,
+	"workerDetails": true,
 	"deviceAlerts":{
 		"enableDeviceCheck": false,
 		"deviceCheckInterval": 60,

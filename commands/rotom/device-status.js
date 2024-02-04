@@ -1,5 +1,6 @@
 const { EmbedBuilder, SlashCommandBuilder, time, hyperlink } = require('discord.js');
-const { rotom } = require('../../config.json');
+const { Pagination } = require('pagination.djs');
+const { rotom, deviceDetails, workerDetails } = require('../../config.json');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -8,6 +9,32 @@ module.exports = {
 	async execute(interaction) {
 
 		console.log(`User ${interaction.user.username} requested the device status.`);
+
+		const paginationDevices = new Pagination(interaction, {
+		    firstEmoji: '⏮', // First button emoji
+		    prevEmoji: '◀️', // Previous button emoji
+		    nextEmoji: '▶️', // Next button emoji
+		    lastEmoji: '⏭', // Last button emoji
+		    limit: 3, // number of entries per page
+		    prevDescription: 'This is prev',
+		    postDescription: 'This is post',
+		    idle: 30000, // idle time in ms before the pagination closes
+		    ephemeral: true, // ephemeral reply
+		    loop: true // loop through the pages
+		});
+
+		const paginationWorker = new Pagination(interaction, {
+		    firstEmoji: '⏮', // First button emoji
+		    prevEmoji: '◀️', // Previous button emoji
+		    nextEmoji: '▶️', // Next button emoji
+		    lastEmoji: '⏭', // Last button emoji
+		    limit: 3, // number of entries per page
+		    prevDescription: 'This is prev',
+		    postDescription: 'This is post',
+		    idle: 5 * 60 * 1000, // idle time in ms before the pagination closes
+		    ephemeral: true, // ephemeral reply
+		    loop: true // loop through the pages
+		});
 
 		// get rotom device status
 		const response = await fetch(rotom.address + "/api/status");
@@ -18,6 +45,7 @@ module.exports = {
 		
 		// build device and worker ermbeds
 		let deviceEmbeds = [];
+		let workerEmbeds = [];
 		let deviceOnlineCounter = 0;
 		let workerOnlineCounter = 0;
 
@@ -90,12 +118,26 @@ module.exports = {
 					.setTimestamp()
 					.setFooter({ text: rotomStatus.workers[i].workerId, iconURL: 'https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/misc/grass.png' });
 			}
-			deviceEmbeds.push(deviceEmbed);
+			workerEmbeds.push(deviceEmbed);
 
 		}
 
 		// send status message
 		const message = `**Status Overview from ${rotomLink}**\nDevices online: ${deviceOnlineCounter}/${rotomStatus.devices.length}\nWorker online: ${workerOnlineCounter}/${rotomStatus.workers.length}`;
-		await interaction.reply({content: message, embeds: deviceEmbeds, ephemeral: true });
+		await interaction.reply({content: message, ephemeral: true });
+
+		if (!deviceDetails || deviceDetails !=false ) {
+			paginationDevices.setEmbeds(deviceEmbeds, (embed, index, array) => {
+			    return embed.setFooter({ text: `Page: ${index + 1}/${array.length}` });
+			});
+			paginationDevices.followUp();
+		};
+
+		if (!workerDetails && rotomStatus.workers.length || workerDetails !=false && rotomStatus.workers.length ) {
+			paginationWorker.setEmbeds(workerEmbeds, (embed, index, array) => {
+			    return embed.setFooter({ text: `Page: ${index + 1}/${array.length}` });
+			});
+			paginationWorker.followUp();
+		};
 	},
 };
