@@ -54,6 +54,21 @@ module.exports = {
 		// sort worker array
 		rotomStatus.workers.sort((a, b) => a.workerId.localeCompare(b.workerId))
 
+		let overviewEmbeds = [];
+
+		let onlineOverviewEmbed = new EmbedBuilder();
+		onlineOverviewEmbed
+			.setColor("Green")
+			.setTitle(`✅ Devices online`)
+			.setThumbnail('https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/1.png')
+			.setTimestamp()
+		let offlineOverviewEmbed = new EmbedBuilder(); 
+		offlineOverviewEmbed
+			.setColor("Red")
+			.setTitle(`⛔ Devices offline`)
+			.setThumbnail('https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/0.png')
+			.setTimestamp()
+
 		for (let i=0; i< rotomStatus.devices.length; i++){
 
 			let lastMessageDate = time(Math.round(rotomStatus.devices[i].dateLastMessageReceived / 1000), 'R');
@@ -72,6 +87,10 @@ module.exports = {
 					.setThumbnail('https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/1.png')
 					.setTimestamp()
 					.setFooter({ text: rotomStatus.devices[i].origin, iconURL: 'https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/1.png' });
+
+				onlineOverviewEmbed
+					.addFields({ name: `📱 Device ${rotomStatus.devices[i].origin}`, value: `received: ${lastMessageDate}\nsend: ${lastMessageSentDate}`, inline: true});
+
 			} else {
 				//console.log(`Device ${rotomStatus.devices[i].origin} is offline`)
 				deviceEmbed
@@ -83,6 +102,9 @@ module.exports = {
 					.setThumbnail('https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/0.png')
 					.setTimestamp()
 					.setFooter({ text: rotomStatus.devices[i].origin, iconURL: 'https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/1.png' });
+
+				offlineOverviewEmbed
+					.addFields({ name: `📱 Device ${rotomStatus.devices[i].origin}`, value: `received: ${lastMessageDate}\nsend: ${lastMessageSentDate}`, inline: true});
 			}
 			deviceEmbeds.push(deviceEmbed);
 
@@ -124,18 +146,26 @@ module.exports = {
 
 		// send status message
 		const message = `**Status Overview from ${rotomLink}**\nDevices online: ${deviceOnlineCounter}/${rotomStatus.devices.length}\nWorker online: ${workerOnlineCounter}/${rotomStatus.workers.length}`;
-		await interaction.reply({content: message, ephemeral: true });
+		
+		if (deviceOnlineCounter != 0) {
+			overviewEmbeds.push(onlineOverviewEmbed);
+		}
+		if (deviceOnlineCounter < rotomStatus.devices.length){
+			overviewEmbeds.push(offlineOverviewEmbed);
+		}
+
+		await interaction.reply({content: message, embeds: overviewEmbeds, ephemeral: true });
 
 		if (!deviceDetails || deviceDetails !=false ) {
 			paginationDevices.setEmbeds(deviceEmbeds, (embed, index, array) => {
-			    return embed.setFooter({ text: `Page: ${index + 1}/${array.length}` });
+			    return embed.setFooter({ text: `Device: ${index + 1}/${array.length}`, iconURL: 'https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/1.png' });
 			});
 			paginationDevices.followUp();
 		};
 
 		if (!workerDetails && rotomStatus.workers.length || workerDetails !=false && rotomStatus.workers.length ) {
 			paginationWorker.setEmbeds(workerEmbeds, (embed, index, array) => {
-			    return embed.setFooter({ text: `Page: ${index + 1}/${array.length}` });
+			    return embed.setFooter({ text: `Worker: ${index + 1}/${array.length}`, iconURL: 'https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/misc/grass.png' });
 			});
 			paginationWorker.followUp();
 		};
