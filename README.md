@@ -3,8 +3,10 @@
 Remote-Rotom is an unofficial Discord bot for [Rotom](https://github.com/UnownHash/Rotom) by UnownHash, built with [Discord.js](https://discord.js.org).
 
 ## Features
+> [!WARNING]  
+> Currently, the bot only supports up to max. 25 devices on the rotom instance! If you have more devices, the messages are too long and the bot will fail.
 - Only accepts interactions from users with a specific Discord role.
-- Provides a simple status overview and detailed embeds for devices and their walkers.
+- Provides a simple status overview and detailed embeds for devices and their walkers, if enabled.
 - Supports commands for device restart, reboot, logcat retrieval, and running Rotom jobs.
 - Periodically checks Rotom host and device status, alerting and triggering power cycle on downtime.
 
@@ -24,6 +26,8 @@ Remote-Rotom is an unofficial Discord bot for [Rotom](https://github.com/UnownHa
 		"address": "http://rotom:7072"
 	},
 	"commandPermissionRole": "your-discord-role-id-goes-here",
+	"deviceDetails": true,
+	"workerDetails": true,
 	"deviceAlerts": {
 		"enableDeviceCheck": false,
 		"deviceCheckInterval": 60,
@@ -41,6 +45,7 @@ Remote-Rotom is an unofficial Discord bot for [Rotom](https://github.com/UnownHa
 	}
 }
 ```
+If `deviceDetails` or `workerDetails` is `true`, the bot will send a paginated message with detail-embeds for each device/worker when using `/device-status`.  
 Values for `deviceCheckInterval` and `powerCycleAfterDeviceDowntime` are in minutes.
 
 ## Commands
@@ -58,7 +63,7 @@ Currently, alert messages won't be deleted automatically. I recommand setting up
 I am writing this bot in my spare time, for fun and to learn more about nodejs. So, this code will be far from being „good“ and needs every support it can get 🙃 please feel free to contribute in any way by opening a PR or creating an issue! 
 
 ## Open Tasks
-- Test/optimize messages for many devices.
+- Test/optimize messages for many devices. Still limited to max 25 devices on rotom instance...
 - Implement unlimited job selection/pagination for more than 25 jobs.
 - Check for Rotom authentication process (currently tested without restrictions).
 - Add Dragonite support.

@@ -1,7 +1,8 @@
-const { rotom, deviceAlerts } = require('../config.json');
+const { rotom, deviceAlerts, deviceDetails, workerDetails } = require('../config.json');
 const wait = require('node:timers/promises').setTimeout;
 const { EmbedBuilder, SlashCommandBuilder, time } = require('discord.js');
 const isReachable = require('is-reachable');
+const { Pagination } = require('pagination.djs');
 
 async function checkDeviceStatus (client){
 
@@ -29,6 +30,28 @@ async function checkDeviceStatus (client){
 		return
 	}
 
+	// const paginationDevices = new Pagination(interaction, {
+	// 	    firstEmoji: '⏮', // First button emoji
+	// 	    prevEmoji: '◀️', // Previous button emoji
+	// 	    nextEmoji: '▶️', // Next button emoji
+	// 	    lastEmoji: '⏭', // Last button emoji
+	// 	    limit: 3, // number of entries per page
+	// 	    idle: 30000, // idle time in ms before the pagination closes
+	// 	    ephemeral: true, // ephemeral reply
+	// 	    loop: true // loop through the pages
+	// 	});
+
+	// 	const paginationWorker = new Pagination(interaction, {
+	// 	    firstEmoji: '⏮', // First button emoji
+	// 	    prevEmoji: '◀️', // Previous button emoji
+	// 	    nextEmoji: '▶️', // Next button emoji
+	// 	    lastEmoji: '⏭', // Last button emoji
+	// 	    limit: 3, // number of entries per page
+	// 	    idle: 5 * 60 * 1000, // idle time in ms before the pagination closes
+	// 	    ephemeral: true, // ephemeral reply
+	// 	    loop: true // loop through the pages
+	// 	});
+
 	// fetch device status
 	const response = await fetch(rotom.address + "/api/status");
 	const rotomStatus = await response.json();
@@ -36,6 +59,7 @@ async function checkDeviceStatus (client){
 
 	// Setup embeds for devices and workers
 	let deviceEmbeds = [];
+	let workerEmbeds = [];
 	let deviceOfflineCounter = 0;
 	let workerOfflineCounter = 0;
 
@@ -43,6 +67,21 @@ async function checkDeviceStatus (client){
 	rotomStatus.devices.sort((a, b) => a.origin.localeCompare(b.origin))
 	// sort worker array
 	rotomStatus.workers.sort((a, b) => a.workerId.localeCompare(b.workerId))
+
+	let overviewEmbeds = [];
+
+	let onlineOverviewEmbed = new EmbedBuilder();
+	onlineOverviewEmbed
+		.setColor("Green")
+		.setTitle(`✅ Devices online`)
+		.setThumbnail('https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/1.png')
+		.setTimestamp()
+	let offlineOverviewEmbed = new EmbedBuilder(); 
+	offlineOverviewEmbed
+		.setColor("Red")
+		.setTitle(`⛔ Devices/Workers offline`)
+		.setThumbnail('https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/0.png')
+		.setTimestamp()
 
 	for (let i=0; i< rotomStatus.devices.length; i++){
 
@@ -61,6 +100,10 @@ async function checkDeviceStatus (client){
 				.setThumbnail('https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/1.png')
 				.setTimestamp()
 				.setFooter({ text: rotomStatus.devices[i].origin, iconURL: 'https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/1.png' });
+
+				// onlineOverviewEmbed
+				// 	.addFields({ name: `📱 Device ${rotomStatus.devices[i].origin}`, value: `received: ${lastMessageDate}\nsend: ${lastMessageSentDate}`, inline: true});
+
 		} else {
 			console.log(`Device ${rotomStatus.devices[i].origin} is offline`)
 			deviceOfflineCounter++
@@ -73,6 +116,10 @@ async function checkDeviceStatus (client){
 				.setThumbnail('https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/0.png')
 				.setTimestamp()
 				.setFooter({ text: rotomStatus.devices[i].origin, iconURL: 'https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/1.png' });
+
+			offlineOverviewEmbed
+				.addFields({ name: `📱 Device ${rotomStatus.devices[i].origin}`, value: `received: ${lastMessageDate}\nsend: ${lastMessageSentDate}`, inline: true});
+			
 		}
 		deviceEmbeds.push(deviceEmbed);
 
@@ -107,10 +154,17 @@ async function checkDeviceStatus (client){
 				.setThumbnail('https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/0.png')
 				.setTimestamp()
 				.setFooter({ text: rotomStatus.workers[i].workerId, iconURL: 'https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/misc/grass.png' });
+
+			offlineOverviewEmbed
+				.addFields({ name: `😴 Worker ${rotomStatus.workers[i].workerId}`, value: `received: ${lastMessageDate}\nsend: ${lastMessageSentDate}`, inline: true});
 		}
 		deviceEmbeds.push(deviceEmbed);
 
 	}
+
+	if (deviceOfflineCounter || workerOfflineCounter){
+			overviewEmbeds.push(offlineOverviewEmbed);
+		}
 
 	// send alert message, if devices or worker are offline
 	if (deviceOfflineCounter > 0 || workerOfflineCounter > 0) {
@@ -121,7 +175,7 @@ async function checkDeviceStatus (client){
 		} else {
 			message = `**⚠️ Attention! One or more Devices or Worker are offline!**\nDevices offline: ${deviceOfflineCounter}/${rotomStatus.devices.length}\nWorker offline: ${workerOfflineCounter}/${rotomStatus.workers.length}`;
 		}
-		const alertMessage = await client.channels.cache.get(deviceAlerts.deviceAlertChannel).send({content: message, embeds: deviceEmbeds});
+		const alertMessage = await client.channels.cache.get(deviceAlerts.deviceAlertChannel).send({content: message, embeds: overviewEmbeds});
 	} else {
 		console.log("...all good! noting to do.");
 	}
