@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { REST, Routes, Client, Collection, Events, GatewayIntentBits } = require('discord.js');
-const { clientId, guildId, token, rotom, commandPermissionRole, deviceAlerts } = require('./config.json');
+const { clientId, guildId, token, rotom, commandPermissionRole, deviceAlerts, botAvatarUrl } = require('./config.json');
 const isReachable = require('is-reachable');
 const { checkDeviceStatus } = require('./utilities/deviceAlert')
 
@@ -37,6 +37,13 @@ client.once(Events.ClientReady, readyClient => {
 
 	// Construct and prepare an instance of the REST module
 	const rest = new REST().setToken(token);
+
+	// Set client avatar
+	if (botAvatarUrl){
+		client.user.setAvatar(botAvatarUrl);
+	}else{
+		client.user.setAvatar('https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/pokemon/479.png');
+	}
 
 	// and deploy your commands!
 	(async () => {

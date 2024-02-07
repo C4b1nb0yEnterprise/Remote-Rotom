@@ -22,6 +22,7 @@ Remote-Rotom is an unofficial Discord bot for [Rotom](https://github.com/UnownHa
 	"token": "your-discord-bot-token-goes-here",
 	"clientId": "your-discord-application-id-goes-here",
 	"guildId": "your-discord-server-id-goes-here",
+	"botAvatarUrl": "your-image-url-here",
 	"rotom": {
 		"address": "http://rotom:7072"
 	},

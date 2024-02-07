@@ -2,6 +2,7 @@
 	"token" = "your-discord-bot-token-goes-here",
 	"clientId": "your-discord-application-id-goes-here",
 	"guildId": "your-discord-server-id-goes-here",
+	"botAvatarUrl": "",
 	"rotom": {
 		"address":"http://rotom:7072"
 	},
