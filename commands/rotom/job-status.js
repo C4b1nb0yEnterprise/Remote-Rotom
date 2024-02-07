@@ -1,5 +1,6 @@
 const { EmbedBuilder, SlashCommandBuilder, time, hyperlink } = require('discord.js');
 const { rotom } = require('../../config.json');
+const { Pagination } = require('pagination.djs');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -9,12 +10,25 @@ module.exports = {
 
 		console.log(`User ${interaction.user.username} requested the job status.`);
 
+		await interaction.deferReply({ ephemeral: true });
 		// get job status
 		const response = await fetch(rotom.address + "/api/job/status");
 		const rotomJobStatus = await response.json();
 
 		// build rotom link
 		const rotomLink = hyperlink('Rotom', rotom.address);
+
+		// create pagination
+		const paginationJobs = new Pagination(interaction, {
+		    firstEmoji: '⏮', // First button emoji
+		    prevEmoji: '◀️', // Previous button emoji
+		    nextEmoji: '▶️', // Next button emoji
+		    lastEmoji: '⏭', // Last button emoji
+		    limit: 3, // number of entries per page
+		    idle: 30000, // idle time in ms before the pagination closes
+		    ephemeral: true, // ephemeral reply
+		    loop: true // loop through the pages
+		});
 		
 		// build job embeds
 		let jobsEmbeds = [];
@@ -74,13 +88,20 @@ module.exports = {
 			}
 
 			jobCounter++;
-			if (jobCounter >= 25) {
-				break;
-			}
+			// if (jobCounter >= 25) {
+			// 	break;
+			// }
 		}
 
 		// send status message
 		const message = `**Status Overview from ${rotomLink}**\nJobs active: ${jobsActiveCounter}/${jobCounter}`;
-		await interaction.reply({content: message, embeds: jobsEmbeds, ephemeral: true });
+		await interaction.editReply({content: message, ephemeral: true });
+		if (jobsEmbeds.length){
+			paginationJobs.setEmbeds(jobsEmbeds, (embed, index, array) => {
+			    return embed.setFooter({ text: `Jobs: ${index + 1}/${array.length}`, iconURL: 'https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/1.png' });
+			});
+			await paginationJobs.followUp();
+		}
+		return
 	},
 };

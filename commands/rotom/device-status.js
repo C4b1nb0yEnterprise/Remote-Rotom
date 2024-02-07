@@ -16,8 +16,6 @@ module.exports = {
 		    nextEmoji: '▶️', // Next button emoji
 		    lastEmoji: '⏭', // Last button emoji
 		    limit: 3, // number of entries per page
-		    prevDescription: 'This is prev',
-		    postDescription: 'This is post',
 		    idle: 30000, // idle time in ms before the pagination closes
 		    ephemeral: true, // ephemeral reply
 		    loop: true // loop through the pages
@@ -29,8 +27,6 @@ module.exports = {
 		    nextEmoji: '▶️', // Next button emoji
 		    lastEmoji: '⏭', // Last button emoji
 		    limit: 3, // number of entries per page
-		    prevDescription: 'This is prev',
-		    postDescription: 'This is post',
 		    idle: 5 * 60 * 1000, // idle time in ms before the pagination closes
 		    ephemeral: true, // ephemeral reply
 		    loop: true // loop through the pages

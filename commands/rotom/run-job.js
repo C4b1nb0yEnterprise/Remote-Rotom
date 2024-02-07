@@ -19,6 +19,21 @@ module.exports = {
 		// sort device array
 		rotomStatus.devices.sort((a, b) => a.origin.localeCompare(b.origin));
 
+		let overviewEmbeds = [];
+
+		let onlineOverviewEmbed = new EmbedBuilder();
+		onlineOverviewEmbed
+			.setColor("Green")
+			.setTitle(`✅ Devices online`)
+			.setThumbnail('https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/1.png')
+			.setTimestamp()
+		let offlineOverviewEmbed = new EmbedBuilder(); 
+		offlineOverviewEmbed
+			.setColor("Red")
+			.setTitle(`⛔ Devices offline`)
+			.setThumbnail('https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/0.png')
+			.setTimestamp()
+
 		for (let i=0; i< rotomStatus.devices.length; i++){
 
 			let lastMessageDate = time(Math.round(rotomStatus.devices[i].dateLastMessageReceived / 1000), 'R');
@@ -37,6 +52,10 @@ module.exports = {
 					.setThumbnail('https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/1.png')
 					.setTimestamp()
 					.setFooter({ text: rotomStatus.devices[i].origin, iconURL: 'https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/1.png' });
+
+				onlineOverviewEmbed
+					.addFields({ name: `📱 Device ${rotomStatus.devices[i].origin}`, value: `received: ${lastMessageDate}\nsend: ${lastMessageSentDate}`, inline: true});
+
 			} else {
 				//console.log(`Device ${rotomStatus.devices[i].origin} is offline`)
 				deviceEmbed
@@ -48,6 +67,9 @@ module.exports = {
 					.setThumbnail('https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/0.png')
 					.setTimestamp()
 					.setFooter({ text: rotomStatus.devices[i].origin, iconURL: 'https://raw.githubusercontent.com/nileplumb/PkmnHomeIcons/master/UICONS/device/1.png' });
+
+				offlineOverviewEmbed
+					.addFields({ name: `📱 Device ${rotomStatus.devices[i].origin}`, value: `received: ${lastMessageDate}\nsend: ${lastMessageSentDate}`, inline: true});
 			}
 			deviceEmbeds.push(deviceEmbed);
 
@@ -97,6 +119,7 @@ module.exports = {
 					.setValue("all")
 			);
 		// Add each device as selection option
+		let deviceCounter = 0;
 		for (let dev = 0; dev < rotomStatus.devices.length; dev++){
 			
 			let deviceOnlineStatus = "Offline";
@@ -113,8 +136,12 @@ module.exports = {
 					.setValue(rotomStatus.devices[dev].deviceId)
 					.setEmoji(deviceEmoji)
 			);
-
+			deviceCounter++
+			if (deviceCounter >= 25) {
+				break;
+			}
 		}
+
 
 		const deviceSelect = new ActionRowBuilder()
 			.addComponents(selectDevice);
@@ -132,6 +159,14 @@ module.exports = {
 
 		const confirmRestart = new ActionRowBuilder()
 			.addComponents( restartAllYes, cancel );
+
+
+		if (deviceOnlineCounter != 0) {
+			overviewEmbeds.push(onlineOverviewEmbed);
+		}
+		if (deviceOnlineCounter < rotomStatus.devices.length){
+			overviewEmbeds.push(offlineOverviewEmbed);
+		}
 
 		// send job selection
 		const responseJobSelect = await interaction.reply({
@@ -155,7 +190,7 @@ module.exports = {
 		collectorJobSelect.on('collect', async i => {
 			selectionJob = i.values[0];
 			console.log(`${i.user} has selected Job ${selectionJob}!`);
-			await i.update({content: `**Please select one or all Device.**\nDevices online: ${deviceOnlineCounter}/${rotomStatus.devices.length}`, components: [deviceSelect], embeds: deviceEmbeds, ephemeral: true });
+			await i.update({content: `**Please select one or all Device.**\nDevices online: ${deviceOnlineCounter}/${rotomStatus.devices.length}`, components: [deviceSelect], embeds: overviewEmbeds, ephemeral: true });
 		});
 
 		// collect device selection
