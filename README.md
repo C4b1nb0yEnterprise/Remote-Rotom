@@ -46,7 +46,7 @@ Remote-Rotom is an unofficial Discord bot for [Rotom](https://github.com/UnownHa
 	}
 }
 ```
-If `deviceDetails` or `workerDetails` is `true`, the bot will send a paginated message with detail-embeds for each device/worker when using `/device-status`.  
+If `deviceDetails` or `workerDetails` is `true`, the bot will send a paginated message with detail-embeds for each device/worker when using `/device-status`.<br>
 Values for `deviceCheckInterval` and `powerCycleAfterDeviceDowntime` are in minutes.
 
 ## Commands
@@ -57,8 +57,8 @@ Values for `deviceCheckInterval` and `powerCycleAfterDeviceDowntime` are in minu
 - `/job-status`: Shows overall status for the latest Rotom jobs with detailed embeds for each job.
 
 ## Device Alerts & Powercycle
-If `enableDeviceCheck` is `true` and a time is set for `deviceCheckInterval`, the bot checks Rotom and device status on interval. Alerts are sent to `deviceAlertChannel`, mentioning `deviceAlertRole` if set. Power cycle requires device check to be enabled. If configured, the bot will search for the device origin of each offline device, and trigger the associated webhooks for power off and on.
-Currently, alert messages won't be deleted automatically. I recommand setting up an Auto-Delete bot like [EAZYAUTODELETE](https://eazyautodelete.xyz) for this channel!
+If `enableDeviceCheck` is `true` and a time is set for `deviceCheckInterval`, the bot checks Rotom and device status on interval. Alerts are sent to `deviceAlertChannel`, mentioning `deviceAlertRole` if set. Power cycle requires device check to be enabled. If configured, the bot will search for the device origin of each offline device, and trigger the associated webhooks for power off and on.<br>
+The old alert messages will be deleted in the same `deviceCheckInterval`, as new messages are send. So messages shouldn't pile up and all devices should be online, when no messages is present.
 
 ## Contribution
 I am writing this bot in my spare time, for fun and to learn more about nodejs. So, this code will be far from being „good“ and needs every support it can get 🙃 please feel free to contribute in any way by opening a PR or creating an issue! 
