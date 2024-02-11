@@ -3,8 +3,8 @@ const { dragonite } = require('../../config.json');
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('re-quest')
-		.setDescription('Select an area to rescan quests.'),
+		.setName('area-quest-start')
+		.setDescription('Start quest scan for selected area.'),
 	async execute(interaction) {
 		await interaction.deferReply({ephemeral: true});
 
@@ -86,7 +86,7 @@ module.exports = {
 		const areaSelectionMenu = new ActionRowBuilder()
 			.addComponents( areaSelect );
 
-		const areaSelection = await interaction.editReply({ content: "Please select the area for the quest rescan", components: [ areaSelectionMenu ] });
+		const areaSelection = await interaction.editReply({ content: "🏞 Please select the area for the quest rescan.", components: [ areaSelectionMenu ] });
 
 		// collect the selection if user matches original sender
 		const collectorFilter = i => i.user.id === interaction.user.id;
@@ -99,8 +99,15 @@ module.exports = {
 			const selection = i.values[0];
 			console.log(`${i.user.username} has selected Area ID ${selection} for re-quest!`);
 
+			let selectionLabel = "none";
+
+			if (selection){
+				let selectedArea = areas.data.find(area => area.id == selection);
+				selectionLabel = selectedArea.name;
+			}
+
 			// send user confirmation
-			const userConfirmation = await i.update({ content: `⚠️ Are you sure, you want to **re-equest Area ID ${selection}**?`, embeds: [], components: [ confirmRestart ] });
+			const userConfirmation = await i.update({ content: `⚠️ Are you sure, you want to **start quest scan** for area **${selectionLabel}**?`, embeds: [], components: [ confirmRestart ] });
 
 
 			// Await confirmation and trigger action
@@ -123,15 +130,17 @@ module.exports = {
 					      	throw new Error("Network response was not OK");
 					     }
 					    console.log("Done with re-quest command.")
-					    await restartUserConfirmation.editReply({ content: `✅ Successfully **re-qeusted Area ID ${selection}**!`, embeds: [], components: [], ephemeral: true })
+					    await restartUserConfirmation.editReply({ content: `✅ Successfully **started quest scan** for Area **${selectionLabel}**!`, embeds: [], components: [], ephemeral: true })
 
 					  } catch (error) {
 					    console.error("There has been a problem with your fetch operation:", error);
+					    await restartUserConfirmation.editReply({ content: `❌ Quest start failed for Area **${selectionLabel}**!`, embeds: [], components: [], ephemeral: true })
+
 					}
 
 				} else if (restartUserConfirmation.customId === 'cancel') {
 					console.log(`${i.user.username} has cancelled the action!`)
-					await restartUserConfirmation.update({ content: 'Action cancelled', embeds: [], components: [] });
+					await restartUserConfirmation.update({ content: '❌ Quest start cancelled', embeds: [], components: [] });
 				}
 			} catch (e) {
 				await interaction.editReply({ content: 'Confirmation not received within 1 minute, cancelling', embeds: [], components: [] });

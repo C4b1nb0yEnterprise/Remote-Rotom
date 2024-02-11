@@ -22,9 +22,9 @@ async function checkDeviceStatus (client){
 		console.log("[WARNING] Rotom is offline! Cannot process request...")
 		let messageRotomDown = "";
 		if (deviceAlerts.deviceAlertRole){
-			messageRotomDown = `**⚠️ Attention <@&${deviceAlerts.deviceAlertRole}>! Rotom is offline!**\nCannot process commands or check status 😔`;
+			messageRotomDown = `**🚨⚠️🚨 Attention <@&${deviceAlerts.deviceAlertRole}>! Rotom is offline!**\nCannot process commands or check status 😔`;
 		} else {
-			messageRotomDown = `**⚠️ Attention! Rotom is offline!**\nCannot process commands or check status 😔`;
+			messageRotomDown = `**🚨⚠️🚨 Attention! Rotom is offline!**\nCannot process commands or check status 😔`;
 		}
 		await client.channels.cache.get(deviceAlerts.deviceAlertChannel).send({content: messageRotomDown, ephemeral: true });
 		return
@@ -171,9 +171,9 @@ async function checkDeviceStatus (client){
 		console.log("... devices offline. Gonna send an alert message!")
 		let message = "";
 		if (deviceAlerts.deviceAlertRole){
-			message = `**⚠️ Attention <@&${deviceAlerts.deviceAlertRole}>! One or more Devices or Worker are offline!**\nDevices offline: ${deviceOfflineCounter}/${rotomStatus.devices.length}\nWorker offline: ${workerOfflineCounter}/${rotomStatus.workers.length}`;
+			message = `**🚨⚠️🚨 Attention <@&${deviceAlerts.deviceAlertRole}>! One or more Devices or Worker are offline!**\nDevices offline: ${deviceOfflineCounter}/${rotomStatus.devices.length}\nWorker offline: ${workerOfflineCounter}/${rotomStatus.workers.length}`;
 		} else {
-			message = `**⚠️ Attention! One or more Devices or Worker are offline!**\nDevices offline: ${deviceOfflineCounter}/${rotomStatus.devices.length}\nWorker offline: ${workerOfflineCounter}/${rotomStatus.workers.length}`;
+			message = `**🚨⚠️🚨 Attention! One or more Devices or Worker are offline!**\nDevices offline: ${deviceOfflineCounter}/${rotomStatus.devices.length}\nWorker offline: ${workerOfflineCounter}/${rotomStatus.workers.length}`;
 		}
 		const alertMessage = await client.channels.cache.get(deviceAlerts.deviceAlertChannel).send({content: message, embeds: overviewEmbeds});
 		setTimeout(() => alertMessage.delete(), deviceAlerts.deviceCheckInterval * 60_000);
@@ -194,7 +194,7 @@ async function checkDeviceStatus (client){
 						console.log("Found the origin in the config!");
 						if (rebootDeviceData.webhookPowerOff && rebootDeviceData.webhookPowerOn) {
 							console.log(`Trigger Recycle for device ${rotomStatus.devices[i].origin} now`);
-							const powercycleMessage = await client.channels.cache.get(deviceAlerts.deviceAlertChannel).send({content: `**⚠️ Attention <@&${deviceAlerts.deviceAlertRole}>!**\nDevice **${rotomStatus.devices[i].origin}** hasn't send data since **${time(Math.round(rotomStatus.devices[i].dateLastMessageReceived / 1000), 'R')}**. Will trigger powercycle now!`});
+							const powercycleMessage = await client.channels.cache.get(deviceAlerts.deviceAlertChannel).send({content: `**🚨⚠️🚨 Attention <@&${deviceAlerts.deviceAlertRole}>!**\nDevice **${rotomStatus.devices[i].origin}** hasn't send data since **${time(Math.round(rotomStatus.devices[i].dateLastMessageReceived / 1000), 'R')}**. Will trigger powercycle now!`});
 							setTimeout(() => powercycleMessage.delete(), deviceAlerts.deviceCheckInterval * 60_000);
 							await fetch(rebootDeviceData.webhookPowerOff);
 							await wait(5_000);

@@ -267,7 +267,7 @@ module.exports = {
 
 			} else if (restartUserConfirmation.customId === "cancel"){
 				console.log("He said no...");
-				await i.editReply({ content: 'Job Execution cancelled', embeds: [], components: [] });
+				await i.editReply({ content: '❌ Job execution cancelled', embeds: [], components: [] });
 			}
 
 		});

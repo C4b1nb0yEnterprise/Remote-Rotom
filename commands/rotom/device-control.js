@@ -222,7 +222,7 @@ module.exports = {
 
 				} else if (restartUserConfirmation.customId === 'cancel') {
 					console.log(`${i.user.username} has cancelled the action!`)
-					await restartUserConfirmation.update({ content: 'Action cancelled', embeds: [], components: [] });
+					await restartUserConfirmation.update({ content: `❌ ${action} cancelled`, embeds: [], components: [] });
 				}
 
 			} catch (e) {
