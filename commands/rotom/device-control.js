@@ -6,12 +6,13 @@ module.exports = {
 		.setName('device-control')
 		.setDescription(`Select a device and perform an action.`)
 		.addStringOption(option => option.setName('action')
-		.setDescription('Which action do you want to execute?')
-		.setRequired(true)
-		.addChoices(
-			{ name: 'restart', value: 'restart' },
-			{ name: 'reboot', value: 'reboot' },
-		)),
+			.setDescription('Which action do you want to execute?')
+			.setRequired(true)
+			.addChoices(
+				{ name: 'restart', value: 'restart' },
+				{ name: 'reboot', value: 'reboot' },
+			)
+		),
 	async execute(interaction) {
 
 		// get device action from user selection
@@ -226,7 +227,7 @@ module.exports = {
 				}
 
 			} catch (e) {
-				await interaction.editReply({ content: 'Confirmation not received within 1 minute, cancelling', embeds: [], components: [] });
+				await interaction.editReply({ content: 'Confirmation not received within 3 minute, cancelling', embeds: [], components: [] });
 			}
 			
 		});

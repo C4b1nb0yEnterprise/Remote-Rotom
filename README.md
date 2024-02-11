@@ -1,6 +1,6 @@
 # Remote-Rotom
 
-Remote-Rotom is an unofficial Discord bot for [Rotom](https://github.com/UnownHash/Rotom) by UnownHash, built with [Discord.js](https://discord.js.org).
+Remote-Rotom is an unofficial Discord bot for [Rotom](https://github.com/UnownHash/Rotom) and [Dragonite](https://github.com/UnownHash/Dragonite-Public) by UnownHash, built with [Discord.js](https://discord.js.org).
 
 ## Features
 > [!WARNING]  
@@ -9,6 +9,7 @@ Remote-Rotom is an unofficial Discord bot for [Rotom](https://github.com/UnownHa
 - Provides a simple status overview and detailed embeds for devices and their walkers, if enabled.
 - Supports commands for device restart, reboot, logcat retrieval, and running Rotom jobs.
 - Supports dragonite command to start quest re-scan for selected area.
+- Supports dragonite command to either dis- or enable an area.
 - Periodically checks Rotom host and device status, alerting and triggering power cycle on downtime.
 
 ## Setup & Install
@@ -61,7 +62,8 @@ Values for `deviceCheckInterval` and `powerCycleAfterDeviceDowntime` are in minu
 - `/device-get-logcat`: Sends the logcat of a single device via DM.
 - `/run-job`: Select a Rotom Job to run on a single or all devices (limited to the first 25 jobs of your Rotom instance).
 - `/job-status`: Shows overall status for the latest Rotom jobs with detailed embeds for each job.
-- `/re-quest`: Select an area from dragonite to start a quest rescan. Only works for the first 25 areas of your dragonite instance!
+- `/area-quest-start`: Select an area from dragonite to start a quest rescan. Only works for the first 25 areas of your dragonite instance!
+- `/area-control`: Enable or disable an area from dragonite. Only works for the first 25 areas of your dragonite instance!
 
 ## Device Alerts & Powercycle
 If `enableDeviceCheck` is `true` and a time is set for `deviceCheckInterval`, the bot checks Rotom and device status on interval. Alerts are sent to `deviceAlertChannel`, mentioning `deviceAlertRole` if set. Power cycle requires device check to be enabled. If configured, the bot will search for the device origin of each offline device, and trigger the associated webhooks for power off and on.<br>
@@ -73,7 +75,7 @@ I am writing this bot in my spare time, for fun and to learn more about nodejs. 
 ## Open Tasks
 - Test/optimize messages for many devices. Still limited to max 25 devices on rotom instance...
 - Implement up to 5 job selection dropdowns (for more than 25 jobs/devices/areas etc.).
-- Add more Dragonite support.
+- Add more Dragonite commands
 
 ## Credits
 Many thanks to UnownHash for creating Rotom (and Dragonite)! Obviously this bot is worthless without it.
